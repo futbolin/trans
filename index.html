@@ -2,22 +2,97 @@
 <html lang="gl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>CAGED Progression Tool</title>
   <style>
-    body { font-family: sans-serif; max-width: 800px; margin: auto; padding: 1em; }
-    textarea { width: 100%; height: 100px; font-family: monospace; }
-    pre { background: #f0f0f0; padding: 0.5em; border-radius: 5px; }
-    button { margin-top: 10px; padding: 0.5em 1em; }
+    :root {
+      --bg: #f9f9fb;
+      --card: #fff;
+      --text: #1c1c1e;
+      --subtext: #6e6e73;
+      --accent: #007aff; /* Azul iOS */
+      --radius: 12px;
+      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      max-width: 800px;
+      margin: auto;
+      padding: 1em;
+    }
+    h1 {
+      font-weight: 600;
+      font-size: 1.6rem;
+      margin-bottom: 0.5em;
+      text-align: center;
+    }
+    p {
+      color: var(--subtext);
+      text-align: center;
+    }
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1em;
+      margin: 1em 0;
+    }
+    textarea {
+      width: 100%;
+      min-height: 120px;
+      font-family: monospace;
+      font-size: 1rem;
+      border: 1px solid #d1d1d6;
+      border-radius: var(--radius);
+      padding: 0.7em;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+    button {
+      display: inline-block;
+      margin-top: 12px;
+      width: 100%;
+      padding: 0.8em;
+      font-size: 1rem;
+      font-weight: 500;
+      border: none;
+      border-radius: var(--radius);
+      background: var(--accent);
+      color: white;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    button:hover {
+      background: #005fcc;
+    }
+    pre {
+      background: #f2f2f7;
+      padding: 1em;
+      border-radius: var(--radius);
+      overflow-x: auto;
+      font-size: 0.95rem;
+    }
+    @media (max-width: 600px) {
+      body { padding: 0.5em; }
+      h1 { font-size: 1.4rem; }
+    }
   </style>
 </head>
 <body>
   <h1>Calculadora CAGED</h1>
   <p>Escribe a progresión (notación latina, varias liñas se queres):</p>
-  <textarea id="input"></textarea><br>
-  <button onclick="procesar()">Calcular</button>
 
-  <h2>Saída</h2>
-  <div id="output"></div>
+  <div class="card">
+    <textarea id="input"></textarea><br>
+    <button onclick="procesar()">Calcular</button>
+  </div>
+
+  <h2 style="text-align:center;">Saída</h2>
+  <div class="card">
+    <div id="output"></div>
+  </div>
 
 <script>
 const CROMA = ["C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"];
@@ -36,7 +111,6 @@ function normalizar(nota){
   }
   return nota;
 }
-
 function traducir(acorde){
   let s = acorde.toLowerCase();
   let keys = Object.keys(LAT2ENG).sort((a,b)=>b.length-a.length);
@@ -47,7 +121,6 @@ function traducir(acorde){
   }
   return acorde;
 }
-
 function detectarRaiz(acorde){
   let CROMA_MATCH = [...CROMA].sort((a,b)=>b.length-a.length);
   for (let n of CROMA_MATCH){
@@ -57,7 +130,6 @@ function detectarRaiz(acorde){
   }
   return [null,acorde];
 }
-
 function transponer(acorde,semitonos){
   let [raiz,resto] = detectarRaiz(acorde);
   if(!raiz) return acorde;
@@ -65,7 +137,6 @@ function transponer(acorde,semitonos){
   let nova = CROMA[(i+semitonos+12)%12];
   return normalizar(nova+resto);
 }
-
 function offsetsCejillas(tonica){
   let idx = CROMA.indexOf(tonica);
   let refs = {"C":"C","A":"A","G":"G","E":"E","D":"D"};
@@ -79,7 +150,6 @@ function offsetsCejillas(tonica){
   }
   return out;
 }
-
 function procesar(){
   let texto = document.getElementById("input").value.trim();
   if (!texto) return;
