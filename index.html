@@ -1,62 +1,101 @@
 <!DOCTYPE html>
 <html lang="gl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Calculadora CAGED</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#007aff" />
   <style>
-    :root {
+    :root{
       --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#6e6e73; --accent:#007aff;
-      --radius:12px; --shadow:0 2px 8px rgba(0,0,0,.1);
+      --radius:12px; --shadow:0 2px 8px rgba(0,0,0,.1); --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
     }
-    body { margin:0; padding:1rem; background:var(--bg);
+    @media (prefers-color-scheme: dark){
+      :root{ --bg:#000; --card:#1c1c1e; --text:#f2f2f7; --sub:#b0b0b5; --accent:#0a84ff; --shadow:none; }
+      body{ background: #000; }
+    }
+    html,body{height:100%}
+    body{ margin:0; padding:1rem; background:var(--bg);
       font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif; color:var(--text); }
-    h1 { text-align:center; margin:.25rem 0 0; font-size:1.5rem; font-weight:700; }
-    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem; margin:1rem 0; }
-    textarea { width:100%; min-height:120px; font-family:monospace; font-size:1rem;
-      padding:.8rem; border:1px solid #d1d1d6; border-radius:var(--radius); box-sizing:border-box; }
-    .row { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
-    button, select { border:none; border-radius:10px; padding:.8rem 1rem; font-size:1rem; }
-    button.primary { background:var(--accent); color:#fff; font-weight:600; flex:1; }
-    button.ghost { background:#e5e5ea; color:#111; }
-    .pill { background:#e5e5ea; border-radius:999px; padding:.35rem .75rem; font-variant-numeric:tabular-nums; }
-    pre { background:#f2f2f7; padding:1rem; border-radius:var(--radius); white-space:pre-wrap; word-break:break-word; }
-    @media (max-width:600px){ button.primary{flex-basis:100%} }
+    h1{ text-align:center; margin:.25rem 0 .5rem; font-size:1.5rem; font-weight:700; }
+    .card{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem; margin:1rem 0; }
+    textarea{ width:100%; min-height:120px; font-family:var(--mono); font-size:1rem;
+      padding:.8rem; border:1px solid #d1d1d6; border-radius:var(--radius); box-sizing:border-box; background:transparent; color:var(--text); }
+    @media (prefers-color-scheme: dark){ textarea{ border-color:#3a3a3c; } }
+    .row{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+    button, select{ border:none; border-radius:10px; padding:.8rem 1rem; font-size:1rem; }
+    button.primary{ background:var(--accent); color:#fff; font-weight:600; }
+    button.ghost{ background:#e5e5ea; color:#111; }
+    @media (prefers-color-scheme: dark){ button.ghost{ background:#2c2c2e; color:#f2f2f7; } }
+    .pill{ background:#e5e5ea; border-radius:999px; padding:.35rem .75rem; font-variant-numeric:tabular-nums; }
+    @media (prefers-color-scheme: dark){ .pill{ background:#2c2c2e; } }
+    pre{ background:#f2f2f7; padding:1rem; border-radius:var(--radius); white-space:pre-wrap; word-break:break-word; font-family:var(--mono); }
+    @media (prefers-color-scheme: dark){ pre{ background:#111114; } }
+    .grow{ flex:1 }
+    .right{ margin-left:auto }
+    .muted{ color:var(--sub) }
+    .history{ display:flex; flex-direction:column; gap:.4rem; max-height:220px; overflow:auto; }
+    .history button{ text-align:left; background:transparent; border:1px solid #d1d1d6; padding:.6rem .8rem; border-radius:10px; font-size:.95rem; }
+    @media (prefers-color-scheme: dark){ .history button{ border-color:#3a3a3c; } }
+    @media (max-width:600px){ button.primary{ flex:1 0 100% } }
   </style>
 </head>
 <body>
   <h1>Calculadora CAGED</h1>
 
   <div class="card">
-    <label for="input" style="display:block;color:var(--sub);margin-bottom:.4rem;">Progresión (notación latina, admite saltos de liña):</label>
+    <label for="input" class="muted" style="display:block;margin-bottom:.4rem;">Progresión (notación latina, admite saltos de liña):</label>
     <textarea id="input" placeholder="ex:\n do sol la- fa"></textarea>
 
     <div class="row" style="margin-top:.75rem;">
-      <button class="primary" onclick="procesar()">Calcular</button>
-      <select id="notation" onchange="procesar()">
-        <option value="latina" selected>Notación: Latina (do, fa#, sib…)</option>
+      <button class="primary" id="btnCalc">Calcular</button>
+      <select id="notation">
+        <option value="latina" selected>Notación: Latina (Do, Fa#, Sib…)</option>
         <option value="inglesa">Notación: Inglesa (C, F#, Bb…)</option>
+      </select>
+      <select id="examples" class="grow">
+        <option value="">— Exemplos rápidos —</option>
+        <option>do sol la- fa</option>
+        <option>sib fa7 re-7 mib mib-</option>
+        <option>do# re# sol# do#</option>
+        <option>re sol la re</option>
+        <option>mi do#- la si</option>
       </select>
     </div>
 
     <div class="row" style="margin-top:.5rem;">
       <span class="pill">Transposición: <span id="tpLabel">0</span></span>
-      <div style="display:flex; gap:.5rem; margin-left:auto;">
-        <button class="ghost" onclick="ajustarTransposicion(-1)">–</button>
-        <button class="ghost" onclick="ajustarTransposicion(+1)">+</button>
+      <div class="right" style="display:flex; gap:.5rem;">
+        <button class="ghost" id="tpMinus">–</button>
+        <button class="ghost" id="tpPlus">+</button>
+        <button class="ghost" id="tpReset">Reset</button>
       </div>
     </div>
+
+    <div class="row" style="margin-top:.5rem;">
+      <button class="ghost" id="btnCopy">Copiar saída</button>
+      <button class="ghost" id="btnDownload">Descargar .txt</button>
+      <button class="ghost" id="btnShare">Compartir link</button>
+      <button class="ghost right" id="btnClear">Limpar</button>
+    </div>
+    <small class="muted" style="display:block;margin-top:.25rem;">Atallos: ⌘/Ctrl+Enter calcular · ←/→ transpoñer –/+</small>
   </div>
 
   <div class="card">
     <h2 style="margin:.2rem 0 1rem; font-size:1.2rem;">Saída</h2>
-    <div id="output"><pre>Escribe a progresión e preme “Calcular”.</pre></div>
+    <div id="output"><pre>Escribe a progresión ou escolle un exemplo.</pre></div>
+  </div>
+
+  <div class="card">
+    <h3 style="margin:.2rem 0 .6rem;">Historial recente</h3>
+    <div class="history" id="history"></div>
   </div>
 
 <script>
-/* --------- Teoría / mapeos --------- */
-const CROMA      = ["C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"];
-const CROMA_LAT  = ["do","do#","re","mib","mi","fa","fa#","sol","sol#","la","sib","si"];
+/* ====== Teoría / mapeos ====== */
+const CROMA     = ["C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"];
+const CROMA_LAT = ["do","do#","re","mib","mi","fa","fa#","sol","sol#","la","sib","si"];
 const LAT2ENG = {
   "solb":"F#","reb":"C#","lab":"G#","mib":"Eb","sib":"Bb",
   "do#":"C#","re#":"Eb","fa#":"F#","sol#":"G#","la#":"Bb",
@@ -65,28 +104,25 @@ const LAT2ENG = {
 const ENG2LAT = Object.fromEntries(CROMA.map((n,i)=>[n, CROMA_LAT[i]]));
 const NORMALIZE = {"B#":"C","E#":"F","Cb":"B","Fb":"E","C##":"D","F##":"G","G##":"A","D##":"E","A##":"B",
                    "Bb#":"B","Eb#":"E","Ab#":"A","Db#":"D","Gb#":"G"};
-/* estado de transposición global (en semitonos) */
-let TP = 0;
 
+/* ====== Estado ====== */
+let TP = 0;  // –12..+12
+const $ = sel => document.querySelector(sel);
+
+/* ====== Utilidades ====== */
 function normalizar(nota){
-  for (let raro in NORMALIZE){
-    if (nota.startsWith(raro)) return nota.replace(raro, NORMALIZE[raro]);
-  }
+  for (let raro in NORMALIZE){ if (nota.startsWith(raro)) return nota.replace(raro,NORMALIZE[raro]); }
   return nota;
 }
 function traducirLat2Eng(token){
   const s = token.toLowerCase();
   const keys = Object.keys(LAT2ENG).sort((a,b)=>b.length-a.length);
-  for (let k of keys){
-    if (s.startsWith(k)) return LAT2ENG[k] + token.slice(k.length);
-  }
-  return token; // xa en inglesa
+  for (let k of keys){ if (s.startsWith(k)) return LAT2ENG[k] + token.slice(k.length); }
+  return token;
 }
 function detectarRaiz(acorde){
   const MATCH = [...CROMA].sort((a,b)=>b.length-a.length);
-  for (let n of MATCH){
-    if (acorde.startsWith(n)) return [n, acorde.slice(n.length)];
-  }
+  for (let n of MATCH){ if (acorde.startsWith(n)) return [n, acorde.slice(n.length)]; }
   return [null, acorde];
 }
 function transponerToken(acorde, semi){
@@ -97,63 +133,172 @@ function transponerToken(acorde, semi){
   return normalizar(nova + resto);
 }
 function offsetsCejillas(tonica){
-  const idx  = CROMA.indexOf(tonica);
+  const idx = CROMA.indexOf(tonica);
   const refs = {"C":"C","A":"A","G":"G","E":"E","D":"D"};
-  const out  = {};
+  const out = {};
   for (let f in refs){
     const idxRef = CROMA.indexOf(refs[f]);
-    out[f] = { offset: (idxRef - idx + 12) % 12, cejilla: (idx - idxRef + 12) % 12 };
+    out[f] = { offset:(idxRef - idx + 12) % 12, cejilla:(idx - idxRef + 12) % 12 };
   }
   return out;
 }
+function capFirst(s){ return s ? s[0].toUpperCase() + s.slice(1) : s; }
 function aLatina(acorde){
   const [r, resto] = detectarRaiz(acorde);
   if (!r) return acorde;
-  return (ENG2LAT[r] || r) + resto;
+  return capFirst(ENG2LAT[r] || r) + resto;
+}
+/* Debounce simple */
+function debounce(fn, wait=250){
+  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), wait); };
 }
 
-/* --------- Motor principal (con transposición TP) --------- */
+/* ====== Motor principal ====== */
 function procesar(){
-  const raw = document.getElementById('input').value.trim();
+  const raw = $('#input').value.trim();
+  const modo = $('#notation').value;
   if (!raw){
-    document.getElementById('output').innerHTML = '<pre>Escribe a progresión e preme “Calcular”.</pre>';
+    $('#output').innerHTML = '<pre>Escribe a progresión ou escolle un exemplo.</pre>';
+    actualizarURL(); guardarEstado(); renderHistorial();
     return;
   }
-  const modo = document.getElementById('notation').value;
-
   // 1) traducir entrada latina -> inglesa
   const lineasEng = raw.split('\n').map(l => l.trim().split(/\s+/).map(traducirLat2Eng));
-
-  // 2) aplicar transposición global TP á progresión antes de calcular CAGED
+  // 2) aplicar transposición global TP
   const lineasTransp = lineasEng.map(tokens => tokens.map(t => transponerToken(t, TP)));
-
-  // 3) tonica efectiva = primeiro acorde despois de transpoñer
+  // 3) tónica efectiva
   const tonica = lineasTransp[0][0];
   const offCej = offsetsCejillas(tonica);
 
-  // 4) xerar saída por formas
-  let out = `Progresión orixinal:\n${raw}\n\nTransposición: ${TP >= 0 ? '+'+TP : TP} semitonos\n\n--- Posiciones CAGED ---\n`;
+  let out = `Progresión orixinal:\n${raw}\n\nTransposición: ${TP>=0?`+${TP}`:TP} semitonos\n\n--- Posiciones CAGED ---\n`;
   for (let forma of ["C","A","G","E","D"]){
     const {offset, cejilla} = offCej[forma];
     out += `\nForma ${forma} (cejilla traste ${cejilla}):\n`;
     for (let linea of lineasTransp){
-      // sobre a progresión xa transposta, aplico o offset da forma (shapes “ao aire”)
       let acordes = linea.map(a => transponerToken(a, offset));
       if (modo === 'latina') acordes = acordes.map(aLatina);
       out += acordes.join(' ') + '\n';
     }
   }
-  document.getElementById('output').innerHTML = `<pre>${out}</pre>`;
-  document.getElementById('tpLabel').textContent = TP >= 0 ? `+${TP}` : `${TP}`;
+  $('#output').innerHTML = `<pre>${out}</pre>`;
+  $('#tpLabel').textContent = TP>=0?`+${TP}`:`${TP}`;
+
+  actualizarURL(); guardarEstado(); pushHistorial(raw, modo, TP);
 }
 
-function ajustarTransposicion(delta){
-  TP = ((TP + delta) % 12 + 12) % 12; // manter en 0..11
-  procesar();
+/* ====== Persistencia & historial ====== */
+const LS_KEY = 'caged_state_v1';
+const LS_HIST = 'caged_history_v1';
+
+function guardarEstado(){
+  const data = { p: $('#input').value.trim(), n: $('#notation').value, tp: TP };
+  localStorage.setItem(LS_KEY, JSON.stringify(data));
+}
+function cargarEstado(){
+  const q = new URLSearchParams(location.search);
+  let p = q.get('p'), n = q.get('n'), tp = q.get('tp');
+  if (p){ $('#input').value = decodeURIComponent(p); }
+  if (n){ $('#notation').value = n; }
+  if (tp){ TP = Math.max(-12, Math.min(12, parseInt(tp,10)||0)); }
+  if (!p){ // se non hai query, carga do localStorage
+    try{
+      const s = JSON.parse(localStorage.getItem(LS_KEY)||'{}');
+      if (s.p) $('#input').value = s.p;
+      if (s.n) $('#notation').value = s.n;
+      if (typeof s.tp === 'number') TP = Math.max(-12, Math.min(12, s.tp));
+    }catch(e){}
+  }
+  $('#tpLabel').textContent = TP>=0?`+${TP}`:`${TP}`;
+}
+function actualizarURL(){
+  const p = encodeURIComponent($('#input').value.trim());
+  const n = $('#notation').value;
+  const tp = TP;
+  const url = `${location.pathname}?p=${p}&n=${n}&tp=${tp}`;
+  history.replaceState(null,'', url);
+}
+function getHist(){
+  try{ return JSON.parse(localStorage.getItem(LS_HIST)||'[]'); }catch(e){ return []; }
+}
+function setHist(arr){ localStorage.setItem(LS_HIST, JSON.stringify(arr)); }
+function pushHistorial(p, n, tp){
+  if (!p) return;
+  let arr = getHist();
+  // evita duplicado exacto consecutivo
+  if (arr[0] && arr[0].p===p && arr[0].n===n && arr[0].tp===tp) return;
+  arr.unshift({p,n,tp, ts:Date.now()});
+  if (arr.length>10) arr = arr.slice(0,10);
+  setHist(arr);
+  renderHistorial();
+}
+function renderHistorial(){
+  const box = $('#history'); box.innerHTML='';
+  const arr = getHist();
+  if (!arr.length){ box.innerHTML = `<div class="muted">Baleiro por agora.</div>`; return; }
+  arr.forEach(item=>{
+    const btn = document.createElement('button');
+    btn.textContent = `${item.p.replace(/\n/g,' · ')}  ·  ${item.n} · ${item.tp>=0?`+${item.tp}`:item.tp}`;
+    btn.onclick = ()=>{
+      $('#input').value = item.p; $('#notation').value = item.n; TP = item.tp;
+      $('#tpLabel').textContent = TP>=0?`+${TP}`:`${TP}`; procesar();
+    };
+    box.appendChild(btn);
+  });
 }
 
-/* opcional: recalcular ao cambiar notación */
-document.getElementById('notation').addEventListener('change', procesar);
+/* ====== UI handlers ====== */
+const doProcesar = debounce(procesar, 250);
+$('#input').addEventListener('input', doProcesar);
+$('#notation').addEventListener('change', procesar);
+$('#examples').addEventListener('change', e=>{
+  if (!e.target.value) return;
+  $('#input').value = e.target.value; procesar();
+  e.target.selectedIndex = 0;
+});
+$('#btnCalc').addEventListener('click', procesar);
+$('#tpMinus').addEventListener('click', ()=>{ TP = Math.max(-12, TP-1); procesar(); });
+$('#tpPlus').addEventListener('click', ()=>{ TP = Math.min(12, TP+1); procesar(); });
+$('#tpReset').addEventListener('click', ()=>{ TP=0; procesar(); });
+$('#btnClear').addEventListener('click', ()=>{
+  $('#input').value=''; $('#notation').value='latina'; TP=0; $('#tpLabel').textContent='0'; procesar();
+});
+$('#btnCopy').addEventListener('click', async ()=>{
+  const text = $('#output').innerText; try{ await navigator.clipboard.writeText(text); }catch(e){}
+});
+$('#btnDownload').addEventListener('click', ()=>{
+  const text = $('#output').innerText || '';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+  a.download = 'caged.txt'; a.click(); URL.revokeObjectURL(a.href);
+});
+$('#btnShare').addEventListener('click', async ()=>{
+  const url = location.href;
+  if (navigator.share){
+    try{ await navigator.share({title:'CAGED', url}); }catch(e){}
+  } else {
+    try{ await navigator.clipboard.writeText(url); }catch(e){}
+    alert('Ligazón copiada ao portapapeis.');
+  }
+});
+/* Atallos de teclado */
+window.addEventListener('keydown', (e)=>{
+  const targetIsTA = document.activeElement === $('#input');
+  if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); procesar(); }
+  if (!targetIsTA && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
+    e.preventDefault();
+    if (e.key==='ArrowLeft') { TP = Math.max(-12, TP-1); }
+    else { TP = Math.min(12, TP+1); }
+    procesar();
+  }
+});
+
+/* ====== Arranque ====== */
+cargarEstado(); procesar();
+
+/* ====== PWA SW ====== */
+if ('serviceWorker' in navigator){
+  window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js') );
+}
 </script>
 </body>
 </html>
