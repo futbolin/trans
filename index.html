@@ -5,91 +5,243 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Calculadora CAGED</title>
   <link rel="manifest" href="manifest.webmanifest">
-  <meta name="theme-color" content="#007aff" />
+  <meta name="theme-color" content="#0a84ff" />
   <style>
+    /* ======= Design tokens ======= */
     :root{
-      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#6e6e73; --accent:#007aff;
-      --radius:12px; --shadow:0 2px 8px rgba(0,0,0,.1); --mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+      --bg: #f5f6f7;
+      --card: #ffffff;
+      --text: #111114;
+      --muted:#6e6e73;
+      --accent:#0a84ff;
+      --danger:#ff453a;
+
+      --border:#d1d1d6;
+      --control-bg:#ffffff;
+      --chip:#f2f2f7;
+
+      --radius:14px;
+      --shadow: 0 6px 20px rgba(0,0,0,.08);
+
+      --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Roboto, Segoe UI, sans-serif;
     }
     @media (prefers-color-scheme: dark){
-      :root{ --bg:#000; --card:#1c1c1e; --text:#f2f2f7; --sub:#b0b0b5; --accent:#0a84ff; --shadow:none; }
-      body{ background: #000; }
+      :root{
+        --bg:#0b0b0c;
+        --card:#161618;
+        --text:#f2f2f7;
+        --muted:#a1a1a6;
+        --accent:#0a84ff;
+
+        --border:#2e2e35;
+        --control-bg:#1d1d20;
+        --chip:#1a1a1d;
+
+        --shadow:none;
+      }
+      body{ background:#000; }
     }
+
+    /* ======= Layout ======= */
     html,body{height:100%}
-    body{ margin:0; padding:1rem; background:var(--bg);
-      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif; color:var(--text); }
-    h1{ text-align:center; margin:.25rem 0 .5rem; font-size:1.5rem; font-weight:700; }
-    .card{ background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem; margin:1rem 0; }
-    textarea{ width:100%; min-height:120px; font-family:var(--mono); font-size:1rem;
-      padding:.8rem; border:1px solid #d1d1d6; border-radius:var(--radius); box-sizing:border-box; background:transparent; color:var(--text); }
-    @media (prefers-color-scheme: dark){ textarea{ border-color:#3a3a3c; } }
-    .row{ display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
-    button, select{ border:none; border-radius:10px; padding:.8rem 1rem; font-size:1rem; }
-    button.primary{ background:var(--accent); color:#fff; font-weight:600; }
-    button.ghost{ background:#e5e5ea; color:#111; }
-    @media (prefers-color-scheme: dark){ button.ghost{ background:#2c2c2e; color:#f2f2f7; } }
-    .pill{ background:#e5e5ea; border-radius:999px; padding:.35rem .75rem; font-variant-numeric:tabular-nums; }
-    @media (prefers-color-scheme: dark){ .pill{ background:#2c2c2e; } }
-    pre{ background:#f2f2f7; padding:1rem; border-radius:var(--radius); white-space:pre-wrap; word-break:break-word; font-family:var(--mono); }
-    @media (prefers-color-scheme: dark){ pre{ background:#111114; } }
-    .grow{ flex:1 }
-    .right{ margin-left:auto }
-    .muted{ color:var(--sub) }
-    .history{ display:flex; flex-direction:column; gap:.4rem; max-height:220px; overflow:auto; }
-    .history button{ text-align:left; background:transparent; border:1px solid #d1d1d6; padding:.6rem .8rem; border-radius:10px; font-size:.95rem; }
-    @media (prefers-color-scheme: dark){ .history button{ border-color:#3a3a3c; } }
-    @media (max-width:600px){ button.primary{ flex:1 0 100% } }
+    body{
+      margin:0;
+      background:var(--bg);
+      color:var(--text);
+      font-family:var(--sans);
+      -webkit-font-smoothing:antialiased;
+      padding: clamp(.75rem, 2vw, 1.25rem);
+    }
+    .wrap{
+      max-width: 680px;
+      margin: 0 auto;
+    }
+    header{
+      text-align:center;
+      margin: .25rem 0 1rem;
+    }
+    header h1{
+      font-size: clamp(1.35rem, 2.5vw, 1.6rem);
+      margin: 0;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    header p{ margin:.35rem 0 0; color:var(--muted); }
+
+    .card{
+      background:var(--card);
+      border:1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    /* ======= Controles ======= */
+    textarea{
+      width:100%;
+      min-height: 120px;
+      padding: .9rem;
+      border-radius: 12px;
+      border:1px solid var(--border);
+      background: var(--control-bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 1rem;
+      box-sizing: border-box;
+      resize: vertical;
+    }
+
+    .toolbar{
+      display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-top:.75rem;
+    }
+
+    .btn{
+      appearance: none; border:1px solid var(--border);
+      background: var(--control-bg); color: var(--text);
+      padding:.7rem .95rem; border-radius: 12px; font-size: .95rem; cursor:pointer;
+      transition: transform .02s ease-in;
+    }
+    .btn:active{ transform: scale(.98); }
+    .btn.primary{ background: var(--accent); color:#fff; border-color: transparent; }
+    .btn.danger{ background: transparent; color: var(--danger); border-color: var(--danger); }
+
+    .segmented{
+      display: inline-flex; border:1px solid var(--border); border-radius: 999px; overflow:hidden;
+      background: var(--control-bg);
+    }
+    .segmented button{
+      border:none; padding:.55rem .9rem; background:transparent; color:var(--text); cursor:pointer; font-size:.9rem;
+    }
+    .segmented button.active{ background: var(--chip); }
+
+    .badge{
+      background: var(--chip); border:1px solid var(--border);
+      padding:.35rem .6rem; border-radius:999px; font-variant-numeric:tabular-nums;
+      color: var(--muted);
+    }
+
+    /* Select estilizado que se ve en claro y oscuro */
+    .select{
+      position:relative; min-width: 200px;
+    }
+    .select select{
+      appearance:none; width:100%;
+      padding:.7rem .95rem;
+      border-radius:12px; border:1px solid var(--border);
+      background: var(--control-bg); color: var(--text);
+      font-size:.95rem; cursor:pointer;
+    }
+    .select:after{
+      content:"▾"; position:absolute; right:.7rem; top:50%; transform:translateY(-50%);
+      color: var(--muted); pointer-events:none;
+    }
+
+    /* ======= Saída ======= */
+    pre{
+      background: var(--chip);
+      border:1px solid var(--border);
+      color: var(--text);
+      border-radius: 12px;
+      padding: 1rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-family: var(--mono);
+      font-size: .98rem;
+      margin:0;
+    }
+
+    /* ======= Historial ======= */
+    .history{
+      display:flex; flex-direction:column; gap:.5rem; max-height: 220px; overflow:auto;
+    }
+    .history-item{
+      display:flex; align-items:center; gap:.5rem;
+      padding:.6rem .75rem; border-radius: 10px;
+      background: var(--chip); border:1px solid var(--border);
+      cursor:pointer;
+    }
+    .history-item:hover{ filter: brightness(1.02); }
+    .history-item small{ color: var(--muted); margin-left:auto; }
+
+    /* ======= Sección avanzada plegable ======= */
+    details{
+      border:1px solid var(--border);
+      border-radius:12px;
+      background: var(--control-bg);
+      padding:.6rem .8rem;
+    }
+    summary{
+      list-style:none; cursor:pointer; color:var(--muted); font-weight:600;
+    }
+    summary::-webkit-details-marker{ display:none; }
+    details[open]{ background: var(--card); }
+
+    /* Compacta en móvil */
+    @media (max-width:640px){
+      .select{ min-width: unset; flex:1 }
+      .toolbar .btn.primary{ flex:1 }
+    }
   </style>
 </head>
 <body>
-  <h1>Calculadora CAGED</h1>
+  <div class="wrap">
+    <header>
+      <h1>Calculadora CAGED</h1>
+      <p>Transpón, escolle notación e obtén as 5 formas CAGED nun click.</p>
+    </header>
 
-  <div class="card">
-    <label for="input" class="muted" style="display:block;margin-bottom:.4rem;">Progresión (notación latina, admite saltos de liña):</label>
-    <textarea id="input" placeholder="ex:\n do sol la- fa"></textarea>
+    <section class="card">
+      <label for="input" style="display:block; color:var(--muted); margin-bottom:.4rem;">Progresión (notación latina, admite saltos de liña):</label>
+      <textarea id="input" placeholder="ex:\n do sol la- fa"></textarea>
 
-    <div class="row" style="margin-top:.75rem;">
-      <button class="primary" id="btnCalc">Calcular</button>
-      <select id="notation">
-        <option value="latina" selected>Notación: Latina (Do, Fa#, Sib…)</option>
-        <option value="inglesa">Notación: Inglesa (C, F#, Bb…)</option>
-      </select>
-      <select id="examples" class="grow">
-        <option value="">— Exemplos rápidos —</option>
-        <option>do sol la- fa</option>
-        <option>sib fa7 re-7 mib mib-</option>
-        <option>do# re# sol# do#</option>
-        <option>re sol la re</option>
-        <option>mi do#- la si</option>
-      </select>
-    </div>
+      <div class="toolbar">
+        <div class="segmented" role="tablist" aria-label="Notación">
+          <button id="btnLat" class="active" onclick="setNotation('latina')" aria-selected="true">Latina</button>
+          <button id="btnEng" onclick="setNotation('inglesa')" aria-selected="false">Inglesa</button>
+        </div>
 
-    <div class="row" style="margin-top:.5rem;">
-      <span class="pill">Transposición: <span id="tpLabel">0</span></span>
-      <div class="right" style="display:flex; gap:.5rem;">
-        <button class="ghost" id="tpMinus">–</button>
-        <button class="ghost" id="tpPlus">+</button>
-        <button class="ghost" id="tpReset">Reset</button>
+        <span class="badge" id="tpView">Transposición: +0</span>
+
+        <div class="segmented" aria-label="Transpoñer">
+          <button onclick="ajustarTransposicion(-1)">–</button>
+          <button onclick="ajustarTransposicion(+1)">+</button>
+          <button onclick="resetTP()">Reset</button>
+        </div>
+
+        <button class="btn primary right" id="btnCalc">Calcular</button>
       </div>
-    </div>
 
-    <div class="row" style="margin-top:.5rem;">
-      <button class="ghost" id="btnCopy">Copiar saída</button>
-      <button class="ghost" id="btnDownload">Descargar .txt</button>
-      <button class="ghost" id="btnShare">Compartir link</button>
-      <button class="ghost right" id="btnClear">Limpar</button>
-    </div>
-    <small class="muted" style="display:block;margin-top:.25rem;">Atallos: ⌘/Ctrl+Enter calcular · ←/→ transpoñer –/+</small>
-  </div>
+      <div class="toolbar" style="margin-top:.5rem;">
+        <div class="select">
+          <select id="examples">
+            <option value="">Exemplos rápidos…</option>
+            <option>do sol la- fa</option>
+            <option>sib fa7 re-7 mib mib-</option>
+            <option>do# re# sol# do#</option>
+            <option>re sol la re</option>
+            <option>mi do#- la si</option>
+          </select>
+        </div>
 
-  <div class="card">
-    <h2 style="margin:.2rem 0 1rem; font-size:1.2rem;">Saída</h2>
-    <div id="output"><pre>Escribe a progresión ou escolle un exemplo.</pre></div>
-  </div>
+        <div class="right" style="display:flex; gap:.5rem; flex-wrap:wrap;">
+          <button class="btn" id="btnCopy">Copiar</button>
+          <button class="btn" id="btnDownload">Descargar .txt</button>
+          <button class="btn" id="btnShare">Compartir</button>
+          <button class="btn danger" id="btnClear">Limpar</button>
+        </div>
+      </div>
 
-  <div class="card">
-    <h3 style="margin:.2rem 0 .6rem;">Historial recente</h3>
-    <div class="history" id="history"></div>
+      <details style="margin-top:.5rem;">
+        <summary>Opcións avanzadas (historial, permalink, PWA)</summary>
+        <div class="history" id="history" style="margin-top:.6rem;"></div>
+      </details>
+    </section>
+
+    <section class="card">
+      <pre id="output">Escribe a progresión ou escolle un exemplo.</pre>
+    </section>
   </div>
 
 <script>
@@ -106,10 +258,11 @@ const NORMALIZE = {"B#":"C","E#":"F","Cb":"B","Fb":"E","C##":"D","F##":"G","G##"
                    "Bb#":"B","Eb#":"E","Ab#":"A","Db#":"D","Gb#":"G"};
 
 /* ====== Estado ====== */
-let TP = 0;  // –12..+12
-const $ = sel => document.querySelector(sel);
+let TP = 0;           // –12..+12
+let NOTATION = 'latina'; // 'latina' ou 'inglesa'
+const $ = s => document.querySelector(s);
 
-/* ====== Utilidades ====== */
+/* ====== Utils ====== */
 function normalizar(nota){
   for (let raro in NORMALIZE){ if (nota.startsWith(raro)) return nota.replace(raro,NORMALIZE[raro]); }
   return nota;
@@ -148,25 +301,19 @@ function aLatina(acorde){
   if (!r) return acorde;
   return capFirst(ENG2LAT[r] || r) + resto;
 }
-/* Debounce simple */
-function debounce(fn, wait=250){
-  let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), wait); };
-}
+function debounce(fn, wait=250){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); }; }
 
-/* ====== Motor principal ====== */
+/* ====== Motor ====== */
 function procesar(){
   const raw = $('#input').value.trim();
-  const modo = $('#notation').value;
   if (!raw){
-    $('#output').innerHTML = '<pre>Escribe a progresión ou escolle un exemplo.</pre>';
-    actualizarURL(); guardarEstado(); renderHistorial();
+    $('#output').textContent = 'Escribe a progresión ou escolle un exemplo.';
+    actualizarURL(); gardarEstado(); renderHistorial();
+    $('#tpView').textContent = `Transposición: ${TP>=0?`+${TP}`:TP}`;
     return;
   }
-  // 1) traducir entrada latina -> inglesa
   const lineasEng = raw.split('\n').map(l => l.trim().split(/\s+/).map(traducirLat2Eng));
-  // 2) aplicar transposición global TP
   const lineasTransp = lineasEng.map(tokens => tokens.map(t => transponerToken(t, TP)));
-  // 3) tónica efectiva
   const tonica = lineasTransp[0][0];
   const offCej = offsetsCejillas(tonica);
 
@@ -176,126 +323,129 @@ function procesar(){
     out += `\nForma ${forma} (cejilla traste ${cejilla}):\n`;
     for (let linea of lineasTransp){
       let acordes = linea.map(a => transponerToken(a, offset));
-      if (modo === 'latina') acordes = acordes.map(aLatina);
+      if (NOTATION === 'latina') acordes = acordes.map(aLatina);
       out += acordes.join(' ') + '\n';
     }
   }
-  $('#output').innerHTML = `<pre>${out}</pre>`;
-  $('#tpLabel').textContent = TP>=0?`+${TP}`:`${TP}`;
+  $('#output').textContent = out;
+  $('#tpView').textContent = `Transposición: ${TP>=0?`+${TP}`:TP}`;
 
-  actualizarURL(); guardarEstado(); pushHistorial(raw, modo, TP);
+  actualizarURL(); gardarEstado(); pushHistorial(raw, NOTATION, TP);
 }
 
-/* ====== Persistencia & historial ====== */
-const LS_KEY = 'caged_state_v1';
-const LS_HIST = 'caged_history_v1';
+/* ====== Persistencia / permalink / historial ====== */
+const LS_KEY = 'caged_state_v2';
+const LS_HIST = 'caged_hist_v2';
 
-function guardarEstado(){
-  const data = { p: $('#input').value.trim(), n: $('#notation').value, tp: TP };
+function gardarEstado(){
+  const data = { p: $('#input').value.trim(), n: NOTATION, tp: TP };
   localStorage.setItem(LS_KEY, JSON.stringify(data));
 }
 function cargarEstado(){
   const q = new URLSearchParams(location.search);
   let p = q.get('p'), n = q.get('n'), tp = q.get('tp');
-  if (p){ $('#input').value = decodeURIComponent(p); }
-  if (n){ $('#notation').value = n; }
-  if (tp){ TP = Math.max(-12, Math.min(12, parseInt(tp,10)||0)); }
-  if (!p){ // se non hai query, carga do localStorage
+  if (p) $('#input').value = decodeURIComponent(p);
+  if (n) NOTATION = (n==='inglesa'?'inglesa':'latina');
+  if (tp) TP = Math.max(-12, Math.min(12, parseInt(tp,10)||0));
+  if (!p){
     try{
       const s = JSON.parse(localStorage.getItem(LS_KEY)||'{}');
       if (s.p) $('#input').value = s.p;
-      if (s.n) $('#notation').value = s.n;
+      if (s.n) NOTATION = s.n;
       if (typeof s.tp === 'number') TP = Math.max(-12, Math.min(12, s.tp));
     }catch(e){}
   }
-  $('#tpLabel').textContent = TP>=0?`+${TP}`:`${TP}`;
+  updateNotationUI();
+  $('#tpView').textContent = `Transposición: ${TP>=0?`+${TP}`:TP}`;
 }
 function actualizarURL(){
   const p = encodeURIComponent($('#input').value.trim());
-  const n = $('#notation').value;
+  const n = NOTATION;
   const tp = TP;
-  const url = `${location.pathname}?p=${p}&n=${n}&tp=${tp}`;
-  history.replaceState(null,'', url);
+  history.replaceState(null,'', `${location.pathname}?p=${p}&n=${n}&tp=${tp}`);
 }
-function getHist(){
-  try{ return JSON.parse(localStorage.getItem(LS_HIST)||'[]'); }catch(e){ return []; }
-}
-function setHist(arr){ localStorage.setItem(LS_HIST, JSON.stringify(arr)); }
-function pushHistorial(p, n, tp){
+function getHist(){ try{ return JSON.parse(localStorage.getItem(LS_HIST)||'[]'); }catch(e){ return []; } }
+function setHist(a){ localStorage.setItem(LS_HIST, JSON.stringify(a)); }
+function pushHistorial(p,n,tp){
   if (!p) return;
   let arr = getHist();
-  // evita duplicado exacto consecutivo
   if (arr[0] && arr[0].p===p && arr[0].n===n && arr[0].tp===tp) return;
-  arr.unshift({p,n,tp, ts:Date.now()});
+  arr.unshift({p,n,tp,ts:Date.now()});
   if (arr.length>10) arr = arr.slice(0,10);
   setHist(arr);
   renderHistorial();
 }
 function renderHistorial(){
-  const box = $('#history'); box.innerHTML='';
-  const arr = getHist();
-  if (!arr.length){ box.innerHTML = `<div class="muted">Baleiro por agora.</div>`; return; }
+  const box = $('#history'); if (!box) return;
+  const arr = getHist(); box.innerHTML='';
+  if (!arr.length){ box.innerHTML = `<div class="muted">Sen entradas recentes.</div>`; return; }
   arr.forEach(item=>{
-    const btn = document.createElement('button');
-    btn.textContent = `${item.p.replace(/\n/g,' · ')}  ·  ${item.n} · ${item.tp>=0?`+${item.tp}`:item.tp}`;
-    btn.onclick = ()=>{
-      $('#input').value = item.p; $('#notation').value = item.n; TP = item.tp;
-      $('#tpLabel').textContent = TP>=0?`+${TP}`:`${TP}`; procesar();
-    };
-    box.appendChild(btn);
+    const div = document.createElement('div');
+    div.className='history-item';
+    div.innerHTML = `<span>${item.p.replace(/\n/g,' · ')}</span><small>${item.n} · ${item.tp>=0?`+${item.tp}`:item.tp}</small>`;
+    div.onclick = ()=>{ $('#input').value=item.p; NOTATION=item.n; TP=item.tp; updateNotationUI(); procesar(); };
+    box.appendChild(div);
   });
 }
 
-/* ====== UI handlers ====== */
-const doProcesar = debounce(procesar, 250);
+/* ====== Notación UI ====== */
+function setNotation(n){
+  NOTATION = n==='inglesa' ? 'inglesa' : 'latina';
+  updateNotationUI(); procesar();
+}
+function updateNotationUI(){
+  $('#btnLat').classList.toggle('active', NOTATION==='latina');
+  $('#btnEng').classList.toggle('active', NOTATION==='inglesa');
+  $('#btnLat').setAttribute('aria-selected', NOTATION==='latina');
+  $('#btnEng').setAttribute('aria-selected', NOTATION==='inglesa');
+}
+
+/* ====== Handlers ====== */
+const doProcesar = debounce(procesar, 220);
 $('#input').addEventListener('input', doProcesar);
-$('#notation').addEventListener('change', procesar);
+$('#btnCalc').addEventListener('click', procesar);
+
 $('#examples').addEventListener('change', e=>{
   if (!e.target.value) return;
-  $('#input').value = e.target.value; procesar();
-  e.target.selectedIndex = 0;
+  $('#input').value = e.target.value; procesar(); e.target.selectedIndex = 0;
 });
-$('#btnCalc').addEventListener('click', procesar);
-$('#tpMinus').addEventListener('click', ()=>{ TP = Math.max(-12, TP-1); procesar(); });
-$('#tpPlus').addEventListener('click', ()=>{ TP = Math.min(12, TP+1); procesar(); });
-$('#tpReset').addEventListener('click', ()=>{ TP=0; procesar(); });
-$('#btnClear').addEventListener('click', ()=>{
-  $('#input').value=''; $('#notation').value='latina'; TP=0; $('#tpLabel').textContent='0'; procesar();
-});
+
+function ajustarTransposicion(d){
+  TP = Math.max(-12, Math.min(12, TP + d));
+  procesar();
+}
+function resetTP(){ TP=0; procesar(); }
+
 $('#btnCopy').addEventListener('click', async ()=>{
-  const text = $('#output').innerText; try{ await navigator.clipboard.writeText(text); }catch(e){}
+  try{ await navigator.clipboard.writeText($('#output').textContent||''); }catch(e){}
 });
 $('#btnDownload').addEventListener('click', ()=>{
-  const text = $('#output').innerText || '';
+  const text = $('#output').textContent||'';
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob([text],{type:'text/plain'}));
   a.download = 'caged.txt'; a.click(); URL.revokeObjectURL(a.href);
 });
 $('#btnShare').addEventListener('click', async ()=>{
   const url = location.href;
-  if (navigator.share){
-    try{ await navigator.share({title:'CAGED', url}); }catch(e){}
-  } else {
-    try{ await navigator.clipboard.writeText(url); }catch(e){}
-    alert('Ligazón copiada ao portapapeis.');
-  }
+  if (navigator.share){ try{ await navigator.share({title:'CAGED', url}); }catch(e){} }
+  else { try{ await navigator.clipboard.writeText(url); alert('Ligazón copiada.'); }catch(e){} }
 });
-/* Atallos de teclado */
+$('#btnClear').addEventListener('click', ()=>{
+  $('#input').value=''; NOTATION='latina'; TP=0; updateNotationUI(); procesar();
+});
+
+/* Atallos teclado */
 window.addEventListener('keydown', (e)=>{
-  const targetIsTA = document.activeElement === $('#input');
+  const onTA = document.activeElement === $('#input');
   if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); procesar(); }
-  if (!targetIsTA && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
-    e.preventDefault();
-    if (e.key==='ArrowLeft') { TP = Math.max(-12, TP-1); }
-    else { TP = Math.min(12, TP+1); }
-    procesar();
+  if (!onTA && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
+    e.preventDefault(); ajustarTransposicion(e.key==='ArrowLeft'?-1:+1);
   }
 });
 
-/* ====== Arranque ====== */
-cargarEstado(); procesar();
+/* Boot + PWA */
+cargarEstado(); renderHistorial(); procesar();
 
-/* ====== PWA SW ====== */
 if ('serviceWorker' in navigator){
   window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js') );
 }
