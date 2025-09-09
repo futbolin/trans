@@ -7,240 +7,175 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#0a84ff" />
   <style>
-    /* ======= Design tokens ======= */
     :root{
-      --bg: #f5f6f7;
-      --card: #ffffff;
-      --text: #111114;
-      --muted:#6e6e73;
-      --accent:#0a84ff;
-      --danger:#ff453a;
-
-      --border:#d1d1d6;
-      --control-bg:#ffffff;
-      --chip:#f2f2f7;
-
-      --radius:14px;
-      --shadow: 0 6px 20px rgba(0,0,0,.08);
-
+      --bg:#f5f6f7; --card:#ffffff; --text:#111114; --muted:#6e6e73; --accent:#0a84ff;
+      --border:#d1d1d6; --control:#ffffff; --chip:#f2f2f7;
+      --radius:14px; --shadow:0 6px 20px rgba(0,0,0,.08);
       --mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
       --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", Inter, Roboto, Segoe UI, sans-serif;
+      --dropdown:#ffffff; --drop-border:#d1d1d6; --drop-shadow:0 10px 24px rgba(0,0,0,.14);
     }
     @media (prefers-color-scheme: dark){
       :root{
-        --bg:#0b0b0c;
-        --card:#161618;
-        --text:#f2f2f7;
-        --muted:#a1a1a6;
-        --accent:#0a84ff;
-
-        --border:#2e2e35;
-        --control-bg:#1d1d20;
-        --chip:#1a1a1d;
-
-        --shadow:none;
+        --bg:#0b0b0c; --card:#161618; --text:#f2f2f7; --muted:#a1a1a6; --accent:#0a84ff;
+        --border:#2e2e35; --control:#1d1d20; --chip:#1a1a1d;
+        --shadow:none; --dropdown:#1e1e22; --drop-border:#2e2e35; --drop-shadow:0 10px 24px rgba(0,0,0,.5);
       }
       body{ background:#000; }
     }
-
-    /* ======= Layout ======= */
     html,body{height:100%}
-    body{
-      margin:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:var(--sans);
-      -webkit-font-smoothing:antialiased;
-      padding: clamp(.75rem, 2vw, 1.25rem);
+    body{ margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
+      -webkit-font-smoothing:antialiased; padding: clamp(.75rem, 2vw, 1.25rem); }
+
+    .wrap{ max-width:680px; margin:0 auto; }
+
+    /* Header */
+    .header{
+      display:flex; align-items:center; gap:.75rem; margin-bottom:.75rem;
     }
-    .wrap{
-      max-width: 680px;
-      margin: 0 auto;
+    .title{
+      display:flex; align-items:center; gap:.6rem; flex:1;
     }
-    header{
-      text-align:center;
-      margin: .25rem 0 1rem;
+    .title img{ height:28px; width:auto; }
+    .title h1{ margin:0; font-size: clamp(1.2rem, 2.2vw, 1.5rem); font-weight:700; letter-spacing:.2px; }
+    .iconbtn{
+      appearance:none; border:1px solid var(--border); background:var(--control); color:var(--text);
+      width:40px; height:40px; border-radius:12px; display:grid; place-items:center; cursor:pointer;
     }
-    header h1{
-      font-size: clamp(1.35rem, 2.5vw, 1.6rem);
-      margin: 0;
-      font-weight: 700;
-      letter-spacing: .2px;
-    }
-    header p{ margin:.35rem 0 0; color:var(--muted); }
+    .iconbtn svg{ width:18px; height:18px; }
 
     .card{
-      background:var(--card);
-      border:1px solid var(--border);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 1rem;
-      margin: 1rem 0;
+      background:var(--card); border:1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding:1rem; margin:1rem 0;
     }
 
-    /* ======= Controles ======= */
     textarea{
-      width:100%;
-      min-height: 120px;
-      padding: .9rem;
-      border-radius: 12px;
-      border:1px solid var(--border);
-      background: var(--control-bg);
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 1rem;
-      box-sizing: border-box;
-      resize: vertical;
+      width:100%; min-height:120px; padding:.9rem; border-radius:12px;
+      border:1px solid var(--border); background:var(--control); color:var(--text);
+      font-family:var(--mono); font-size:1rem; box-sizing:border-box; resize:vertical;
     }
 
-    .toolbar{
-      display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-top:.75rem;
-    }
-
-    .btn{
-      appearance: none; border:1px solid var(--border);
-      background: var(--control-bg); color: var(--text);
-      padding:.7rem .95rem; border-radius: 12px; font-size: .95rem; cursor:pointer;
-      transition: transform .02s ease-in;
-    }
-    .btn:active{ transform: scale(.98); }
-    .btn.primary{ background: var(--accent); color:#fff; border-color: transparent; }
-    .btn.danger{ background: transparent; color: var(--danger); border-color: var(--danger); }
+    .toolbar{ display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-top:.75rem; }
 
     .segmented{
-      display: inline-flex; border:1px solid var(--border); border-radius: 999px; overflow:hidden;
-      background: var(--control-bg);
+      display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:var(--control);
     }
     .segmented button{
       border:none; padding:.55rem .9rem; background:transparent; color:var(--text); cursor:pointer; font-size:.9rem;
     }
     .segmented button.active{ background: var(--chip); }
 
-    .badge{
-      background: var(--chip); border:1px solid var(--border);
-      padding:.35rem .6rem; border-radius:999px; font-variant-numeric:tabular-nums;
-      color: var(--muted);
-    }
+    .badge{ background:var(--chip); border:1px solid var(--border); padding:.35rem .6rem; border-radius:999px;
+      font-variant-numeric:tabular-nums; color:var(--muted); }
+    .spacer{ flex:1 }
 
-    /* Select estilizado que se ve en claro y oscuro */
-    .select{
-      position:relative; min-width: 200px;
-    }
-    .select select{
-      appearance:none; width:100%;
-      padding:.7rem .95rem;
-      border-radius:12px; border:1px solid var(--border);
-      background: var(--control-bg); color: var(--text);
-      font-size:.95rem; cursor:pointer;
-    }
-    .select:after{
-      content:"▾"; position:absolute; right:.7rem; top:50%; transform:translateY(-50%);
-      color: var(--muted); pointer-events:none;
-    }
-
-    /* ======= Saída ======= */
     pre{
-      background: var(--chip);
-      border:1px solid var(--border);
-      color: var(--text);
-      border-radius: 12px;
-      padding: 1rem;
-      white-space: pre-wrap;
-      word-break: break-word;
-      font-family: var(--mono);
-      font-size: .98rem;
-      margin:0;
+      background:var(--chip); border:1px solid var(--border); color:var(--text);
+      border-radius:12px; padding:1rem; white-space:pre-wrap; word-break:break-word;
+      font-family:var(--mono); font-size:.98rem; margin:0;
     }
 
-    /* ======= Historial ======= */
-    .history{
-      display:flex; flex-direction:column; gap:.5rem; max-height: 220px; overflow:auto;
+    /* Dropdown simple */
+    .dropdown{
+      position:relative;
     }
-    .history-item{
-      display:flex; align-items:center; gap:.5rem;
-      padding:.6rem .75rem; border-radius: 10px;
-      background: var(--chip); border:1px solid var(--border);
-      cursor:pointer;
+    .menu{
+      position:absolute; right:0; top:calc(100% + 8px); min-width: 220px;
+      background:var(--dropdown); border:1px solid var(--drop-border); border-radius:12px;
+      box-shadow: var(--drop-shadow); padding:.4rem; display:none; z-index:20;
     }
-    .history-item:hover{ filter: brightness(1.02); }
-    .history-item small{ color: var(--muted); margin-left:auto; }
+    .menu.open{ display:block; }
+    .menu button{
+      width:100%; background:transparent; border:none; text-align:left;
+      display:flex; align-items:center; gap:.6rem; padding:.6rem .6rem; border-radius:10px; color:var(--text); cursor:pointer;
+    }
+    .menu button:hover{ background: var(--chip); }
+    .menu svg{ width:18px; height:18px; color:var(--muted); }
 
-    /* ======= Sección avanzada plegable ======= */
-    details{
-      border:1px solid var(--border);
-      border-radius:12px;
-      background: var(--control-bg);
-      padding:.6rem .8rem;
-    }
-    summary{
-      list-style:none; cursor:pointer; color:var(--muted); font-weight:600;
-    }
+    details{ border:1px solid var(--border); border-radius:12px; background:var(--control); padding:.6rem .8rem; }
+    summary{ list-style:none; cursor:pointer; color:var(--muted); font-weight:600; }
     summary::-webkit-details-marker{ display:none; }
     details[open]{ background: var(--card); }
+    .history{ display:flex; flex-direction:column; gap:.5rem; max-height:220px; overflow:auto; margin-top:.6rem; }
+    .hist-item{ display:flex; gap:.5rem; align-items:center; padding:.6rem .75rem; border-radius:10px;
+      background:var(--chip); border:1px solid var(--border); cursor:pointer; }
+    .hist-item small{ color:var(--muted); margin-left:auto; }
 
-    /* Compacta en móvil */
     @media (max-width:640px){
-      .select{ min-width: unset; flex:1 }
-      .toolbar .btn.primary{ flex:1 }
+      .segmented .btn{ flex:1 }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <header>
-      <h1>Calculadora CAGED</h1>
-      <p>Transpón, escolle notación e obtén as 5 formas CAGED nun click.</p>
-    </header>
+    <div class="header">
+      <div class="title">
+        <!-- Usa tu logo si quieres -->
+        <!-- <img src="caged-logo.svg" alt="CAGED" /> -->
+        <h1>Calculadora CAGED</h1>
+      </div>
+
+      <!-- Papelera (limpiar) -->
+      <button class="iconbtn" id="btnClear" title="Limpar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14"/>
+        </svg>
+      </button>
+
+      <!-- Menú ⋯ -->
+      <div class="dropdown">
+        <button class="iconbtn" id="btnMenu" title="Menú">
+          <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+        </button>
+        <div class="menu" id="menu">
+          <button id="actCopy">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            Copiar saída
+          </button>
+          <button id="actDownload">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+            Descargar .txt
+          </button>
+          <button id="actShare">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v14"/></svg>
+            Compartir ligazón
+          </button>
+        </div>
+      </div>
+    </div>
 
     <section class="card">
       <label for="input" style="display:block; color:var(--muted); margin-bottom:.4rem;">Progresión (notación latina, admite saltos de liña):</label>
       <textarea id="input" placeholder="ex:\n do sol la- fa"></textarea>
 
       <div class="toolbar">
+        <!-- Notación -->
         <div class="segmented" role="tablist" aria-label="Notación">
           <button id="btnLat" class="active" onclick="setNotation('latina')" aria-selected="true">Latina</button>
           <button id="btnEng" onclick="setNotation('inglesa')" aria-selected="false">Inglesa</button>
         </div>
 
+        <!-- Transposición -->
         <span class="badge" id="tpView">Transposición: +0</span>
-
         <div class="segmented" aria-label="Transpoñer">
           <button onclick="ajustarTransposicion(-1)">–</button>
           <button onclick="ajustarTransposicion(+1)">+</button>
           <button onclick="resetTP()">Reset</button>
         </div>
 
-        <button class="btn primary right" id="btnCalc">Calcular</button>
+        <div class="spacer"></div>
       </div>
-
-      <div class="toolbar" style="margin-top:.5rem;">
-        <div class="select">
-          <select id="examples">
-            <option value="">Exemplos rápidos…</option>
-            <option>do sol la- fa</option>
-            <option>sib fa7 re-7 mib mib-</option>
-            <option>do# re# sol# do#</option>
-            <option>re sol la re</option>
-            <option>mi do#- la si</option>
-          </select>
-        </div>
-
-        <div class="right" style="display:flex; gap:.5rem; flex-wrap:wrap;">
-          <button class="btn" id="btnCopy">Copiar</button>
-          <button class="btn" id="btnDownload">Descargar .txt</button>
-          <button class="btn" id="btnShare">Compartir</button>
-          <button class="btn danger" id="btnClear">Limpar</button>
-        </div>
-      </div>
-
-      <details style="margin-top:.5rem;">
-        <summary>Opcións avanzadas (historial, permalink, PWA)</summary>
-        <div class="history" id="history" style="margin-top:.6rem;"></div>
-      </details>
     </section>
 
     <section class="card">
-      <pre id="output">Escribe a progresión ou escolle un exemplo.</pre>
+      <pre id="output">Escribe a progresión.</pre>
+    </section>
+
+    <section class="card">
+      <details>
+        <summary>Opcións avanzadas (historial, permalink, PWA)</summary>
+        <div class="history" id="history"></div>
+      </details>
     </section>
   </div>
 
@@ -258,8 +193,8 @@ const NORMALIZE = {"B#":"C","E#":"F","Cb":"B","Fb":"E","C##":"D","F##":"G","G##"
                    "Bb#":"B","Eb#":"E","Ab#":"A","Db#":"D","Gb#":"G"};
 
 /* ====== Estado ====== */
-let TP = 0;           // –12..+12
-let NOTATION = 'latina'; // 'latina' ou 'inglesa'
+let TP = 0;                 // –12..+12
+let NOTATION = 'latina';    // 'latina' | 'inglesa'
 const $ = s => document.querySelector(s);
 
 /* ====== Utils ====== */
@@ -301,13 +236,13 @@ function aLatina(acorde){
   if (!r) return acorde;
   return capFirst(ENG2LAT[r] || r) + resto;
 }
-function debounce(fn, wait=250){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); }; }
+function debounce(fn, wait=220){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a), wait); }; }
 
-/* ====== Motor ====== */
+/* ====== Motor (con orden por cejilla ascendente) ====== */
 function procesar(){
   const raw = $('#input').value.trim();
   if (!raw){
-    $('#output').textContent = 'Escribe a progresión ou escolle un exemplo.';
+    $('#output').textContent = 'Escribe a progresión.';
     actualizarURL(); gardarEstado(); renderHistorial();
     $('#tpView').textContent = `Transposición: ${TP>=0?`+${TP}`:TP}`;
     return;
@@ -317,9 +252,14 @@ function procesar(){
   const tonica = lineasTransp[0][0];
   const offCej = offsetsCejillas(tonica);
 
-  let out = `Progresión orixinal:\n${raw}\n\nTransposición: ${TP>=0?`+${TP}`:TP} semitonos\n\n--- Posiciones CAGED ---\n`;
-  for (let forma of ["C","A","G","E","D"]){
-    const {offset, cejilla} = offCej[forma];
+  // ordenar formas por traste de cejilla ascendente
+  const formasOrdenadas = Object.entries(offCej)
+    .map(([forma, data]) => ({ forma, ...data }))
+    .sort((a,b)=> a.cejilla - b.cejilla);
+
+  let out = `Progresión orixinal:\n${raw}\n\nTransposición: ${TP>=0?`+${TP}`:TP} semitonos\n\n--- Posiciones CAGED (orden por traste) ---\n`;
+  for (let item of formasOrdenadas){
+    const {forma, offset, cejilla} = item;
     out += `\nForma ${forma} (cejilla traste ${cejilla}):\n`;
     for (let linea of lineasTransp){
       let acordes = linea.map(a => transponerToken(a, offset));
@@ -334,8 +274,8 @@ function procesar(){
 }
 
 /* ====== Persistencia / permalink / historial ====== */
-const LS_KEY = 'caged_state_v2';
-const LS_HIST = 'caged_hist_v2';
+const LS_KEY = 'caged_state_ui_v1';
+const LS_HIST = 'caged_hist_ui_v1';
 
 function gardarEstado(){
   const data = { p: $('#input').value.trim(), n: NOTATION, tp: TP };
@@ -372,16 +312,15 @@ function pushHistorial(p,n,tp){
   if (arr[0] && arr[0].p===p && arr[0].n===n && arr[0].tp===tp) return;
   arr.unshift({p,n,tp,ts:Date.now()});
   if (arr.length>10) arr = arr.slice(0,10);
-  setHist(arr);
-  renderHistorial();
+  setHist(arr); renderHistorial();
 }
 function renderHistorial(){
   const box = $('#history'); if (!box) return;
   const arr = getHist(); box.innerHTML='';
-  if (!arr.length){ box.innerHTML = `<div class="muted">Sen entradas recentes.</div>`; return; }
+  if (!arr.length){ box.innerHTML = `<div style="color:var(--muted)">Sen entradas recentes.</div>`; return; }
   arr.forEach(item=>{
     const div = document.createElement('div');
-    div.className='history-item';
+    div.className='hist-item';
     div.innerHTML = `<span>${item.p.replace(/\n/g,' · ')}</span><small>${item.n} · ${item.tp>=0?`+${item.tp}`:item.tp}</small>`;
     div.onclick = ()=>{ $('#input').value=item.p; NOTATION=item.n; TP=item.tp; updateNotationUI(); procesar(); };
     box.appendChild(div);
@@ -403,41 +342,49 @@ function updateNotationUI(){
 /* ====== Handlers ====== */
 const doProcesar = debounce(procesar, 220);
 $('#input').addEventListener('input', doProcesar);
-$('#btnCalc').addEventListener('click', procesar);
 
-$('#examples').addEventListener('change', e=>{
-  if (!e.target.value) return;
-  $('#input').value = e.target.value; procesar(); e.target.selectedIndex = 0;
+/* Papelera */
+$('#btnClear').addEventListener('click', ()=>{
+  $('#input').value=''; NOTATION='latina'; TP=0; updateNotationUI(); procesar();
 });
 
+/* Menú ⋯ (dropdown simple) */
+const menu = $('#menu');
+$('#btnMenu').addEventListener('click', (e)=>{
+  e.stopPropagation(); menu.classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  if (!menu.contains(e.target) && e.target !== $('#btnMenu')) menu.classList.remove('open');
+});
+/* Acciones del menú */
+$('#actCopy').addEventListener('click', async ()=>{
+  try{ await navigator.clipboard.writeText($('#output').textContent||''); }catch(e){}
+  menu.classList.remove('open');
+});
+$('#actDownload').addEventListener('click', ()=>{
+  const text = $('#output').textContent||'';
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([text],{type:'text/plain'}));
+  a.download = 'caged.txt'; a.click(); URL.revokeObjectURL(a.href);
+  menu.classList.remove('open');
+});
+$('#actShare').addEventListener('click', async ()=>{
+  const url = location.href;
+  if (navigator.share){ try{ await navigator.share({title:'CAGED', url}); }catch(e){} }
+  else { try{ await navigator.clipboard.writeText(url); alert('Ligazón copiada.'); }catch(e){} }
+  menu.classList.remove('open');
+});
+
+/* Transposición */
 function ajustarTransposicion(d){
   TP = Math.max(-12, Math.min(12, TP + d));
   procesar();
 }
 function resetTP(){ TP=0; procesar(); }
 
-$('#btnCopy').addEventListener('click', async ()=>{
-  try{ await navigator.clipboard.writeText($('#output').textContent||''); }catch(e){}
-});
-$('#btnDownload').addEventListener('click', ()=>{
-  const text = $('#output').textContent||'';
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob([text],{type:'text/plain'}));
-  a.download = 'caged.txt'; a.click(); URL.revokeObjectURL(a.href);
-});
-$('#btnShare').addEventListener('click', async ()=>{
-  const url = location.href;
-  if (navigator.share){ try{ await navigator.share({title:'CAGED', url}); }catch(e){} }
-  else { try{ await navigator.clipboard.writeText(url); alert('Ligazón copiada.'); }catch(e){} }
-});
-$('#btnClear').addEventListener('click', ()=>{
-  $('#input').value=''; NOTATION='latina'; TP=0; updateNotationUI(); procesar();
-});
-
 /* Atallos teclado */
 window.addEventListener('keydown', (e)=>{
   const onTA = document.activeElement === $('#input');
-  if ((e.metaKey||e.ctrlKey) && e.key==='Enter'){ e.preventDefault(); procesar(); }
   if (!onTA && (e.key==='ArrowLeft' || e.key==='ArrowRight')){
     e.preventDefault(); ajustarTransposicion(e.key==='ArrowLeft'?-1:+1);
   }
@@ -445,10 +392,7 @@ window.addEventListener('keydown', (e)=>{
 
 /* Boot + PWA */
 cargarEstado(); renderHistorial(); procesar();
-
-if ('serviceWorker' in navigator){
-  window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js') );
-}
+if ('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js') ); }
 </script>
 </body>
 </html>
