@@ -69,9 +69,24 @@
     .badge{ background:var(--chip); border:1px solid var(--border); padding:.35rem .6rem; border-radius:999px;
       font-variant-numeric:tabular-nums; color:var(--muted); }
 
-    .label-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem; }
+    .label-row{ display:flex; align-items:center; justify-content:space-between; gap:.6rem; }
     .label-row h2{ margin:0; font-size:1.05rem; font-weight:700; }
-    .label-row .right{ display:flex; gap:.6rem; align-items:center; }
+    .label-row .right{ display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; }
+
+    /* --- Apilar controles de Saída en móvil --- */
+    @media (max-width: 520px){
+      .label-row{ align-items:flex-start; }
+      .label-row .right{
+        width:100%;
+        flex-direction: column;   /* apila vertical */
+        align-items: stretch;
+        gap:.5rem;
+      }
+      .label-row .right .segmented,
+      .label-row .right .badge{
+        width:100%;              /* ocupan ancho completo */
+      }
+    }
 
     pre{
       background:var(--chip); border:1px solid var(--border); color:var(--text);
@@ -97,7 +112,7 @@
     .menu button:hover{ background: var(--chip); }
     .menu svg{ width:18px; height:18px; color:var(--muted); }
 
-    /* Barra Historial simple */
+    /* Barra Historial */
     .hist-bar{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
     .hist-bar h2{ margin:0; font-size:1.05rem; font-weight:700; }
     .hist-open.btn{ padding:.6rem .9rem; border-radius:10px; border:1px solid var(--border); background:var(--control); cursor:pointer; }
@@ -179,12 +194,12 @@
       <div class="label-row">
         <h2>Saída</h2>
         <div class="right">
-          <!-- Notación al lado del título -->
+          <!-- Notación -->
           <div class="segmented" role="tablist" aria-label="Notación">
             <button id="btnLat" class="active" onclick="setNotation('latina')" aria-selected="true">Latina</button>
             <button id="btnEng" onclick="setNotation('inglesa')" aria-selected="false">Inglesa</button>
           </div>
-          <!-- Transposición al lado también -->
+          <!-- Transposición -->
           <span class="badge" id="tpView">Transposición: +0</span>
           <div class="segmented" aria-label="Transpoñer">
             <button onclick="ajustarTransposicion(-1)">–</button>
@@ -410,10 +425,9 @@ function getPanelRatio(){
   return h / window.innerHeight;
 }
 function openHist(){
-  renderHistorial(); // llena contenido
+  renderHistorial();
   setPanelHeightByRatio(0.5); // abre a 50%
   sheet.classList.add('open'); sheet.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
-  // asegura posición visible (slide up animado por CSS)
 }
 function closeHist(){
   sheet.classList.remove('open'); sheet.setAttribute('aria-hidden','true'); document.body.style.overflow='';
@@ -432,7 +446,7 @@ function onStart(e){
 function onMove(e){
   if (!dragging) return;
   const y = (e.touches? e.touches[0].clientY : e.clientY);
-  const dy = startY - y; // arrastrar hacia arriba => positivo
+  const dy = startY - y; // arriba => positivo
   const newH = startH + dy;
   const ratio = newH / window.innerHeight;
   setPanelHeightByRatio(ratio);
@@ -442,8 +456,7 @@ function onEnd(){
   dragging = false;
   panel.style.transition = ''; // vuelve animación para snaps
   const r = getPanelRatio();
-  // si está muy abajo, cerrar
-  if (r < 0.22){ closeHist(); return; }
+  if (r < 0.22){ closeHist(); return; } // muy abajo => cerrar
   // snap al más cercano
   let nearest = SNAP[0]; let best = Infinity;
   for (let s of SNAP){ const diff = Math.abs(s - r); if (diff < best){ best = diff; nearest = s; } }
@@ -457,6 +470,7 @@ window.addEventListener('touchmove', onMove, {passive:false});
 window.addEventListener('touchend', onEnd);
 
 /* Render historial dentro del sheet */
+function getHist(){ try{ return JSON.parse(localStorage.getItem('caged_hist_sheet_v2')||'[]'); }catch(e){ return []; } }
 function renderHistorial(){
   const box = $('#history'); if (!box) return;
   const arr = getHist(); box.innerHTML='';
@@ -470,7 +484,7 @@ function renderHistorial(){
   });
 }
 
-/* ====== Boot + PWA ====== */
+/* Boot + PWA */
 cargarEstado(); procesar();
 if ('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js') ); }
 </script>
