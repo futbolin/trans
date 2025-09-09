@@ -25,10 +25,10 @@
       }
       body{ background:#000; }
     }
+
     html,body{height:100%}
     body{ margin:0; background:var(--bg); color:var(--text); font-family:var(--sans);
       -webkit-font-smoothing:antialiased; padding: clamp(.75rem, 2vw, 1.25rem); }
-
     .wrap{ max-width:680px; margin:0 auto; }
 
     /* Header */
@@ -38,36 +38,48 @@
     .iconbtn{
       appearance:none; border:1px solid var(--border); background:var(--control); color:var(--text);
       width:40px; height:40px; border-radius:12px; display:grid; place-items:center; cursor:pointer;
+      transition: transform .04s ease, background .2s ease;
     }
+    .iconbtn:active{ transform: scale(.97); }
     .iconbtn svg{ width:18px; height:18px; }
 
-    .card{ background:var(--card); border:1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding:1rem; margin:1rem 0; }
+    .card{ background:var(--card); border:1px solid var(--border);
+      border-radius: var(--radius); box-shadow: var(--shadow); padding:1rem; margin:1rem 0; }
 
     textarea{
       width:100%; min-height:120px; padding:.9rem; border-radius:12px;
       border:1px solid var(--border); background:var(--control); color:var(--text);
       font-family:var(--mono); font-size:1rem; box-sizing:border-box; resize:vertical;
+      transition: border-color .2s ease;
     }
+    textarea:focus{ outline:none; border-color:#9ec9ff; }
 
-    .toolbar{ display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; margin-top:.75rem; }
+    .toolbar{ display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; }
 
     .segmented{
       display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:var(--control);
     }
     .segmented button{
       border:none; padding:.55rem .9rem; background:transparent; color:var(--text); cursor:pointer; font-size:.9rem;
+      transition: background .15s ease, transform .04s ease;
     }
+    .segmented button:active{ transform: scale(.98); }
     .segmented button.active{ background: var(--chip); }
 
     .badge{ background:var(--chip); border:1px solid var(--border); padding:.35rem .6rem; border-radius:999px;
       font-variant-numeric:tabular-nums; color:var(--muted); }
-    .spacer{ flex:1 }
+
+    .label-row{ display:flex; align-items:center; justify-content:space-between; margin-bottom:.6rem; }
+    .label-row h2{ margin:0; font-size:1.05rem; font-weight:700; }
+    .label-row .right{ display:flex; gap:.6rem; align-items:center; }
 
     pre{
       background:var(--chip); border:1px solid var(--border); color:var(--text);
       border-radius:12px; padding:1rem; white-space:pre-wrap; word-break:break-word;
       font-family:var(--mono); font-size:.98rem; margin:0;
+      animation: fadein .18s ease-out;
     }
+    @keyframes fadein{ from{opacity:0; transform: translateY(2px);} to{opacity:1; transform:none;} }
 
     /* Dropdown simple */
     .dropdown{ position:relative; }
@@ -85,47 +97,47 @@
     .menu button:hover{ background: var(--chip); }
     .menu svg{ width:18px; height:18px; color:var(--muted); }
 
-    /* Historial (sheet con animación) */
+    /* Barra Historial simple */
     .hist-bar{ display:flex; align-items:center; justify-content:space-between; gap:.75rem; }
     .hist-bar h2{ margin:0; font-size:1.05rem; font-weight:700; }
     .hist-open.btn{ padding:.6rem .9rem; border-radius:10px; border:1px solid var(--border); background:var(--control); cursor:pointer; }
 
-    .sheet{
-      position:fixed; inset:0; display:none; z-index:50;
-    }
+    /* Bottom Sheet (draggable con snap points) */
+    .sheet{ position:fixed; inset:0; display:none; z-index:50; }
     .sheet.open{ display:block; }
     .sheet__backdrop{
       position:absolute; inset:0; background: var(--backdrop); opacity:0; transition: opacity .2s ease;
     }
     .sheet.open .sheet__backdrop{ opacity:1; }
     .sheet__panel{
-      position:absolute; left:50%; transform: translate(-50%, 100%);
-      bottom:0; width: min(680px, 100%); background: var(--sheet-bg); border-top-left-radius: 16px; border-top-right-radius: 16px;
-      border:1px solid var(--sheet-border); border-bottom:none; box-shadow: 0 -10px 30px rgba(0,0,0,.18);
-      padding: 12px 16px 16px; max-height: 70vh; overflow:auto;
+      position:absolute; left:50%; bottom:0; transform: translate(-50%, 100%);
+      width: min(680px, 100%); background: var(--sheet-bg);
+      border-top-left-radius: 16px; border-top-right-radius: 16px;
+      border:1px solid var(--sheet-border); border-bottom:none;
+      box-shadow: 0 -10px 30px rgba(0,0,0,.18);
+      max-height: 80vh; height: 50vh; /* default open height */
+      display:flex; flex-direction:column;
       transition: transform .28s cubic-bezier(.2,.8,.2,1);
+      will-change: transform;
     }
     .sheet.open .sheet__panel{ transform: translate(-50%, 0%); }
     .sheet__grab{
-      width:40px; height:4px; background:#c7c7cc; border-radius:999px; margin:6px auto 12px;
+      width:42px; height:5px; background:#c7c7cc; border-radius:999px; margin:10px auto;
     }
-    @media (prefers-color-scheme: dark){
-      .sheet__grab{ background:#3a3a3c; }
-    }
+    @media (prefers-color-scheme: dark){ .sheet__grab{ background:#3a3a3c; } }
+    .sheet__content{ padding: 0 16px 16px; overflow:auto; }
     .history{ display:flex; flex-direction:column; gap:.5rem; }
     .hist-item{
       display:flex; gap:.5rem; align-items:center; padding:.6rem .75rem; border-radius:10px;
       background:var(--chip); border:1px solid var(--border); cursor:pointer;
     }
     .hist-item small{ color:var(--muted); margin-left:auto; }
-
   </style>
 </head>
 <body>
   <div class="wrap">
     <div class="header">
       <div class="title">
-        <!-- <img src="caged-logo.svg" alt="CAGED" height="24" /> -->
         <h1>Calculadora CAGED</h1>
       </div>
 
@@ -161,31 +173,29 @@
     <section class="card">
       <label for="input" style="display:block; color:var(--muted); margin-bottom:.4rem;">Progresión (notación latina, admite saltos de liña):</label>
       <textarea id="input" placeholder="ex:\n do sol la- fa"></textarea>
-
-      <div class="toolbar">
-        <!-- Notación -->
-        <div class="segmented" role="tablist" aria-label="Notación">
-          <button id="btnLat" class="active" onclick="setNotation('latina')" aria-selected="true">Latina</button>
-          <button id="btnEng" onclick="setNotation('inglesa')" aria-selected="false">Inglesa</button>
-        </div>
-
-        <!-- Transposición -->
-        <span class="badge" id="tpView">Transposición: +0</span>
-        <div class="segmented" aria-label="Transpoñer">
-          <button onclick="ajustarTransposicion(-1)">–</button>
-          <button onclick="ajustarTransposicion(+1)">+</button>
-          <button onclick="resetTP()">Reset</button>
-        </div>
-
-        <div class="spacer"></div>
-      </div>
     </section>
 
     <section class="card">
+      <div class="label-row">
+        <h2>Saída</h2>
+        <div class="right">
+          <!-- Notación al lado del título -->
+          <div class="segmented" role="tablist" aria-label="Notación">
+            <button id="btnLat" class="active" onclick="setNotation('latina')" aria-selected="true">Latina</button>
+            <button id="btnEng" onclick="setNotation('inglesa')" aria-selected="false">Inglesa</button>
+          </div>
+          <!-- Transposición al lado también -->
+          <span class="badge" id="tpView">Transposición: +0</span>
+          <div class="segmented" aria-label="Transpoñer">
+            <button onclick="ajustarTransposicion(-1)">–</button>
+            <button onclick="ajustarTransposicion(+1)">+</button>
+            <button onclick="resetTP()">Reset</button>
+          </div>
+        </div>
+      </div>
       <pre id="output">Escribe a progresión.</pre>
     </section>
 
-    <!-- Barra Historial -->
     <section class="card">
       <div class="hist-bar">
         <h2>Historial</h2>
@@ -194,12 +204,14 @@
     </section>
   </div>
 
-  <!-- Sheet Historial -->
+  <!-- Bottom Sheet Historial (draggable) -->
   <div class="sheet" id="histSheet" aria-hidden="true">
     <div class="sheet__backdrop" id="histBackdrop"></div>
-    <div class="sheet__panel" role="dialog" aria-modal="true" aria-label="Historial recente">
-      <div class="sheet__grab"></div>
-      <div class="history" id="history"></div>
+    <div class="sheet__panel" id="histPanel" role="dialog" aria-modal="true" aria-label="Historial recente">
+      <div class="sheet__grab" id="histGrab"></div>
+      <div class="sheet__content">
+        <div class="history" id="history"></div>
+      </div>
     </div>
   </div>
 
@@ -297,8 +309,8 @@ function procesar(){
 }
 
 /* ====== Persistencia / permalink / historial ====== */
-const LS_KEY = 'caged_state_sheet_v1';
-const LS_HIST = 'caged_hist_sheet_v1';
+const LS_KEY = 'caged_state_sheet_v2';
+const LS_HIST = 'caged_hist_sheet_v2';
 
 function gardarEstado(){
   const data = { p: $('#input').value.trim(), n: NOTATION, tp: TP };
@@ -335,19 +347,7 @@ function pushHistorial(p,n,tp){
   if (arr[0] && arr[0].p===p && arr[0].n===n && arr[0].tp===tp) return;
   arr.unshift({p,n,tp,ts:Date.now()});
   if (arr.length>10) arr = arr.slice(0,10);
-  setHist(arr); renderHistorial();
-}
-function renderHistorial(){
-  const box = $('#history'); if (!box) return;
-  const arr = getHist(); box.innerHTML='';
-  if (!arr.length){ box.innerHTML = `<div style="color:var(--muted)">Sen entradas recentes.</div>`; return; }
-  arr.forEach(item=>{
-    const div = document.createElement('div');
-    div.className='hist-item';
-    div.innerHTML = `<span>${item.p.replace(/\n/g,' · ')}</span><small>${item.n} · ${item.tp>=0?`+${item.tp}`:item.tp}</small>`;
-    div.onclick = ()=>{ $('#input').value=item.p; NOTATION=item.n; TP=item.tp; updateNotationUI(); procesar(); closeHist(); };
-    box.appendChild(div);
-  });
+  setHist(arr); // render en open
 }
 
 /* ====== Notación UI ====== */
@@ -396,15 +396,81 @@ $('#actShare').addEventListener('click', async ()=>{
 function ajustarTransposicion(d){ TP = Math.max(-12, Math.min(12, TP + d)); procesar(); }
 function resetTP(){ TP=0; procesar(); }
 
-/* Historial Sheet */
-const sheet = $('#histSheet'), backdrop = $('#histBackdrop');
-function openHist(){ sheet.classList.add('open'); sheet.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden'; renderHistorial(); }
-function closeHist(){ sheet.classList.remove('open'); sheet.setAttribute('aria-hidden','true'); document.body.style.overflow=''; }
+/* ====== Bottom Sheet – Historial con drag ====== */
+const sheet = $('#histSheet'), backdrop = $('#histBackdrop'), panel = $('#histPanel'), grab = $('#histGrab');
+const SNAP = [0.25, 0.5, 0.8]; // ratios de alto
+let startY=0, startH=0, dragging=false;
+
+function setPanelHeightByRatio(r){
+  r = Math.max(0.2, Math.min(0.92, r));
+  panel.style.height = `${r*100}vh`;
+}
+function getPanelRatio(){
+  const h = panel.getBoundingClientRect().height;
+  return h / window.innerHeight;
+}
+function openHist(){
+  renderHistorial(); // llena contenido
+  setPanelHeightByRatio(0.5); // abre a 50%
+  sheet.classList.add('open'); sheet.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
+  // asegura posición visible (slide up animado por CSS)
+}
+function closeHist(){
+  sheet.classList.remove('open'); sheet.setAttribute('aria-hidden','true'); document.body.style.overflow='';
+}
 $('#openHist').addEventListener('click', openHist);
 backdrop.addEventListener('click', closeHist);
 window.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && sheet.classList.contains('open')) closeHist(); });
 
-/* Boot + PWA */
+// Drag (touch + mouse)
+function onStart(e){
+  dragging = true;
+  startY = (e.touches? e.touches[0].clientY : e.clientY);
+  startH = panel.getBoundingClientRect().height;
+  panel.style.transition = 'none';
+}
+function onMove(e){
+  if (!dragging) return;
+  const y = (e.touches? e.touches[0].clientY : e.clientY);
+  const dy = startY - y; // arrastrar hacia arriba => positivo
+  const newH = startH + dy;
+  const ratio = newH / window.innerHeight;
+  setPanelHeightByRatio(ratio);
+}
+function onEnd(){
+  if (!dragging) return;
+  dragging = false;
+  panel.style.transition = ''; // vuelve animación para snaps
+  const r = getPanelRatio();
+  // si está muy abajo, cerrar
+  if (r < 0.22){ closeHist(); return; }
+  // snap al más cercano
+  let nearest = SNAP[0]; let best = Infinity;
+  for (let s of SNAP){ const diff = Math.abs(s - r); if (diff < best){ best = diff; nearest = s; } }
+  setPanelHeightByRatio(nearest);
+}
+grab.addEventListener('mousedown', onStart);
+window.addEventListener('mousemove', onMove);
+window.addEventListener('mouseup', onEnd);
+grab.addEventListener('touchstart', onStart, {passive:true});
+window.addEventListener('touchmove', onMove, {passive:false});
+window.addEventListener('touchend', onEnd);
+
+/* Render historial dentro del sheet */
+function renderHistorial(){
+  const box = $('#history'); if (!box) return;
+  const arr = getHist(); box.innerHTML='';
+  if (!arr.length){ box.innerHTML = `<div style="color:var(--muted); padding:.5rem 0;">Sen entradas recentes.</div>`; return; }
+  arr.forEach(item=>{
+    const div = document.createElement('div');
+    div.className='hist-item';
+    div.innerHTML = `<span>${item.p.replace(/\n/g,' · ')}</span><small>${item.n} · ${item.tp>=0?`+${item.tp}`:item.tp}</small>`;
+    div.onclick = ()=>{ $('#input').value=item.p; NOTATION=item.n; TP=item.tp; updateNotationUI(); procesar(); closeHist(); };
+    box.appendChild(div);
+  });
+}
+
+/* ====== Boot + PWA ====== */
 cargarEstado(); procesar();
 if ('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('./sw.js') ); }
 </script>
