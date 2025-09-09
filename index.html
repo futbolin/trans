@@ -2,172 +2,158 @@
 <html lang="gl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>CAGED Progression Tool</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Calculadora CAGED</title>
   <style>
     :root {
-      --bg: #f9f9fb;
-      --card: #fff;
-      --text: #1c1c1e;
-      --subtext: #6e6e73;
-      --accent: #007aff; /* Azul iOS */
-      --radius: 12px;
-      --shadow: 0 4px 12px rgba(0,0,0,0.08);
+      --bg:#f2f2f7; --card:#fff; --text:#1c1c1e; --sub:#6e6e73; --accent:#007aff;
+      --radius:12px; --shadow:0 2px 8px rgba(0,0,0,.1);
     }
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", Roboto, sans-serif;
-      background: var(--bg);
-      color: var(--text);
-      max-width: 800px;
-      margin: auto;
-      padding: 1em;
-    }
-    h1 {
-      font-weight: 600;
-      font-size: 1.6rem;
-      margin-bottom: 0.5em;
-      text-align: center;
-    }
-    p {
-      color: var(--subtext);
-      text-align: center;
-    }
-    .card {
-      background: var(--card);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      padding: 1em;
-      margin: 1em 0;
-    }
-    textarea {
-      width: 100%;
-      min-height: 120px;
-      font-family: monospace;
-      font-size: 1rem;
-      border: 1px solid #d1d1d6;
-      border-radius: var(--radius);
-      padding: 0.7em;
-      box-sizing: border-box;
-      resize: vertical;
-    }
-    button {
-      display: inline-block;
-      margin-top: 12px;
-      width: 100%;
-      padding: 0.8em;
-      font-size: 1rem;
-      font-weight: 500;
-      border: none;
-      border-radius: var(--radius);
-      background: var(--accent);
-      color: white;
-      cursor: pointer;
-      transition: background 0.2s ease;
-    }
-    button:hover {
-      background: #005fcc;
-    }
-    pre {
-      background: #f2f2f7;
-      padding: 1em;
-      border-radius: var(--radius);
-      overflow-x: auto;
-      font-size: 0.95rem;
-    }
-    @media (max-width: 600px) {
-      body { padding: 0.5em; }
-      h1 { font-size: 1.4rem; }
-    }
+    body { margin:0; padding:1rem; background:var(--bg);
+      font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text",Roboto,sans-serif; color:var(--text); }
+    h1 { text-align:center; margin:.25rem 0 0; font-size:1.5rem; font-weight:700; }
+    .card { background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:1rem; margin:1rem 0; }
+    textarea { width:100%; min-height:120px; font-family:monospace; font-size:1rem;
+      padding:.8rem; border:1px solid #d1d1d6; border-radius:var(--radius); box-sizing:border-box; }
+    .row { display:flex; gap:.5rem; align-items:center; flex-wrap:wrap; }
+    button, select { border:none; border-radius:10px; padding:.8rem 1rem; font-size:1rem; }
+    button.primary { background:var(--accent); color:#fff; font-weight:600; flex:1; }
+    button.ghost { background:#e5e5ea; color:#111; }
+    .pill { background:#e5e5ea; border-radius:999px; padding:.35rem .75rem; font-variant-numeric:tabular-nums; }
+    pre { background:#f2f2f7; padding:1rem; border-radius:var(--radius); white-space:pre-wrap; word-break:break-word; }
+    @media (max-width:600px){ button.primary{flex-basis:100%} }
   </style>
 </head>
 <body>
   <h1>Calculadora CAGED</h1>
-  <p>Escribe a progresión (notación latina, varias liñas se queres):</p>
 
   <div class="card">
-    <textarea id="input"></textarea><br>
-    <button onclick="procesar()">Calcular</button>
+    <label for="input" style="display:block;color:var(--sub);margin-bottom:.4rem;">Progresión (notación latina, admite saltos de liña):</label>
+    <textarea id="input" placeholder="ex:\n do sol la- fa"></textarea>
+
+    <div class="row" style="margin-top:.75rem;">
+      <button class="primary" onclick="procesar()">Calcular</button>
+      <select id="notation" onchange="procesar()">
+        <option value="latina" selected>Notación: Latina (do, fa#, sib…)</option>
+        <option value="inglesa">Notación: Inglesa (C, F#, Bb…)</option>
+      </select>
+    </div>
+
+    <div class="row" style="margin-top:.5rem;">
+      <span class="pill">Transposición: <span id="tpLabel">0</span></span>
+      <div style="display:flex; gap:.5rem; margin-left:auto;">
+        <button class="ghost" onclick="ajustarTransposicion(-1)">–</button>
+        <button class="ghost" onclick="ajustarTransposicion(+1)">+</button>
+      </div>
+    </div>
   </div>
 
-  <h2 style="text-align:center;">Saída</h2>
   <div class="card">
-    <div id="output"></div>
+    <h2 style="margin:.2rem 0 1rem; font-size:1.2rem;">Saída</h2>
+    <div id="output"><pre>Escribe a progresión e preme “Calcular”.</pre></div>
   </div>
 
 <script>
-const CROMA = ["C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"];
+/* --------- Teoría / mapeos --------- */
+const CROMA      = ["C","C#","D","Eb","E","F","F#","G","G#","A","Bb","B"];
+const CROMA_LAT  = ["do","do#","re","mib","mi","fa","fa#","sol","sol#","la","sib","si"];
 const LAT2ENG = {
   "solb":"F#","reb":"C#","lab":"G#","mib":"Eb","sib":"Bb",
   "do#":"C#","re#":"Eb","fa#":"F#","sol#":"G#","la#":"Bb",
   "do":"C","re":"D","mi":"E","fa":"F","sol":"G","la":"A","si":"B"
 };
-const NORMALIZE = {"B#":"C","E#":"F","Cb":"B","Fb":"E","C##":"D","F##":"G",
-                   "G##":"A","D##":"E","A##":"B","Bb#":"B","Eb#":"E","Ab#":"A",
-                   "Db#":"D","Gb#":"G"};
+const ENG2LAT = Object.fromEntries(CROMA.map((n,i)=>[n, CROMA_LAT[i]]));
+const NORMALIZE = {"B#":"C","E#":"F","Cb":"B","Fb":"E","C##":"D","F##":"G","G##":"A","D##":"E","A##":"B",
+                   "Bb#":"B","Eb#":"E","Ab#":"A","Db#":"D","Gb#":"G"};
+/* estado de transposición global (en semitonos) */
+let TP = 0;
 
 function normalizar(nota){
   for (let raro in NORMALIZE){
-    if (nota.startsWith(raro)) return nota.replace(raro,NORMALIZE[raro]);
+    if (nota.startsWith(raro)) return nota.replace(raro, NORMALIZE[raro]);
   }
   return nota;
 }
-function traducir(acorde){
-  let s = acorde.toLowerCase();
-  let keys = Object.keys(LAT2ENG).sort((a,b)=>b.length-a.length);
+function traducirLat2Eng(token){
+  const s = token.toLowerCase();
+  const keys = Object.keys(LAT2ENG).sort((a,b)=>b.length-a.length);
   for (let k of keys){
-    if (s.startsWith(k)){
-      return LAT2ENG[k]+acorde.slice(k.length);
-    }
+    if (s.startsWith(k)) return LAT2ENG[k] + token.slice(k.length);
   }
-  return acorde;
+  return token; // xa en inglesa
 }
 function detectarRaiz(acorde){
-  let CROMA_MATCH = [...CROMA].sort((a,b)=>b.length-a.length);
-  for (let n of CROMA_MATCH){
-    if (acorde.startsWith(n)){
-      return [n, acorde.slice(n.length)];
-    }
+  const MATCH = [...CROMA].sort((a,b)=>b.length-a.length);
+  for (let n of MATCH){
+    if (acorde.startsWith(n)) return [n, acorde.slice(n.length)];
   }
-  return [null,acorde];
+  return [null, acorde];
 }
-function transponer(acorde,semitonos){
-  let [raiz,resto] = detectarRaiz(acorde);
-  if(!raiz) return acorde;
-  let i = CROMA.indexOf(raiz);
-  let nova = CROMA[(i+semitonos+12)%12];
-  return normalizar(nova+resto);
+function transponerToken(acorde, semi){
+  const [raiz, resto] = detectarRaiz(acorde);
+  if (!raiz) return acorde;
+  const i = CROMA.indexOf(raiz);
+  const nova = CROMA[(i + semi + 1200) % 12];
+  return normalizar(nova + resto);
 }
 function offsetsCejillas(tonica){
-  let idx = CROMA.indexOf(tonica);
-  let refs = {"C":"C","A":"A","G":"G","E":"E","D":"D"};
-  let out = {};
-  for (let forma in refs){
-    let idxRef = CROMA.indexOf(refs[forma]);
-    out[forma] = {
-      offset:(idxRef-idx+12)%12,
-      cejilla:(idx-idxRef+12)%12
-    };
+  const idx  = CROMA.indexOf(tonica);
+  const refs = {"C":"C","A":"A","G":"G","E":"E","D":"D"};
+  const out  = {};
+  for (let f in refs){
+    const idxRef = CROMA.indexOf(refs[f]);
+    out[f] = { offset: (idxRef - idx + 12) % 12, cejilla: (idx - idxRef + 12) % 12 };
   }
   return out;
 }
-function procesar(){
-  let texto = document.getElementById("input").value.trim();
-  if (!texto) return;
-  let lineas = texto.split("\n").map(l=>l.trim().split(/\s+/).map(traducir));
-  let tonica = lineas[0][0];
-  let offCej = offsetsCejillas(tonica);
+function aLatina(acorde){
+  const [r, resto] = detectarRaiz(acorde);
+  if (!r) return acorde;
+  return (ENG2LAT[r] || r) + resto;
+}
 
-  let output = `<pre>Progresión orixinal (latina):\n${texto}\n\n--- Posiciones CAGED ---\n`;
+/* --------- Motor principal (con transposición TP) --------- */
+function procesar(){
+  const raw = document.getElementById('input').value.trim();
+  if (!raw){
+    document.getElementById('output').innerHTML = '<pre>Escribe a progresión e preme “Calcular”.</pre>';
+    return;
+  }
+  const modo = document.getElementById('notation').value;
+
+  // 1) traducir entrada latina -> inglesa
+  const lineasEng = raw.split('\n').map(l => l.trim().split(/\s+/).map(traducirLat2Eng));
+
+  // 2) aplicar transposición global TP á progresión antes de calcular CAGED
+  const lineasTransp = lineasEng.map(tokens => tokens.map(t => transponerToken(t, TP)));
+
+  // 3) tonica efectiva = primeiro acorde despois de transpoñer
+  const tonica = lineasTransp[0][0];
+  const offCej = offsetsCejillas(tonica);
+
+  // 4) xerar saída por formas
+  let out = `Progresión orixinal:\n${raw}\n\nTransposición: ${TP >= 0 ? '+'+TP : TP} semitonos\n\n--- Posiciones CAGED ---\n`;
   for (let forma of ["C","A","G","E","D"]){
-    let {offset,cejilla} = offCej[forma];
-    output += `\nForma ${forma} (cejilla traste ${cejilla}):\n`;
-    for (let linea of lineas){
-      output += linea.map(a=>transponer(a,offset)).join(" ")+"\n";
+    const {offset, cejilla} = offCej[forma];
+    out += `\nForma ${forma} (cejilla traste ${cejilla}):\n`;
+    for (let linea of lineasTransp){
+      // sobre a progresión xa transposta, aplico o offset da forma (shapes “ao aire”)
+      let acordes = linea.map(a => transponerToken(a, offset));
+      if (modo === 'latina') acordes = acordes.map(aLatina);
+      out += acordes.join(' ') + '\n';
     }
   }
-  output += "</pre>";
-  document.getElementById("output").innerHTML = output;
+  document.getElementById('output').innerHTML = `<pre>${out}</pre>`;
+  document.getElementById('tpLabel').textContent = TP >= 0 ? `+${TP}` : `${TP}`;
 }
+
+function ajustarTransposicion(delta){
+  TP = ((TP + delta) % 12 + 12) % 12; // manter en 0..11
+  procesar();
+}
+
+/* opcional: recalcular ao cambiar notación */
+document.getElementById('notation').addEventListener('change', procesar);
 </script>
 </body>
 </html>
