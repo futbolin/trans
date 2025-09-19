@@ -54,8 +54,6 @@
     }
     textarea:focus{ outline:none; border-color:#9ec9ff; }
 
-    .toolbar{ display:flex; gap:.6rem; flex-wrap:wrap; align-items:center; }
-
     .segmented{
       display:inline-flex; border:1px solid var(--border); border-radius:999px; overflow:hidden; background:var(--control);
     }
@@ -78,13 +76,13 @@
       .label-row{ align-items:flex-start; }
       .label-row .right{
         width:100%;
-        flex-direction: column;   /* apila vertical */
+        flex-direction: column;
         align-items: stretch;
         gap:.5rem;
       }
       .label-row .right .segmented,
       .label-row .right .badge{
-        width:100%;              /* ocupan ancho completo */
+        width:100%;
       }
     }
 
@@ -130,15 +128,13 @@
       border-top-left-radius: 16px; border-top-right-radius: 16px;
       border:1px solid var(--sheet-border); border-bottom:none;
       box-shadow: 0 -10px 30px rgba(0,0,0,.18);
-      max-height: 80vh; height: 50vh; /* default open height */
+      max-height: 80vh; height: 50vh;
       display:flex; flex-direction:column;
       transition: transform .28s cubic-bezier(.2,.8,.2,1);
       will-change: transform;
     }
     .sheet.open .sheet__panel{ transform: translate(-50%, 0%); }
-    .sheet__grab{
-      width:42px; height:5px; background:#c7c7cc; border-radius:999px; margin:10px auto;
-    }
+    .sheet__grab{ width:42px; height:5px; background:#c7c7cc; border-radius:999px; margin:10px auto; }
     @media (prefers-color-scheme: dark){ .sheet__grab{ background:#3a3a3c; } }
     .sheet__content{ padding: 0 16px 16px; overflow:auto; }
     .history{ display:flex; flex-direction:column; gap:.5rem; }
@@ -147,6 +143,22 @@
       background:var(--chip); border:1px solid var(--border); cursor:pointer;
     }
     .hist-item small{ color:var(--muted); margin-left:auto; }
+
+    /* --- Ayuda (botón + frase) --- */
+    .help-wrap{ display:flex; flex-direction:column; gap:.6rem; }
+    .help-btn{
+      appearance:none; border:1px solid var(--border); background:var(--accent); color:#fff;
+      padding:.8rem 1rem; border-radius:12px; font-weight:700; letter-spacing:.2px; cursor:pointer;
+      text-align:center; transition: transform .04s ease, opacity .2s ease;
+    }
+    .help-btn:active{ transform: scale(.98); }
+    .help-phrase{
+      background:var(--chip); border:1px solid var(--border); color:var(--text);
+      border-radius:12px; padding:.8rem 1rem; font-family:var(--sans);
+      opacity:0; transform: translateY(4px); transition: opacity .18s ease, transform .18s ease;
+    }
+    .help-phrase.show{ opacity:1; transform:none; }
+    .help-phrase em{ color:var(--muted); font-style:normal; }
   </style>
 </head>
 <body>
@@ -215,6 +227,14 @@
       <div class="hist-bar">
         <h2>Historial</h2>
         <button class="hist-open btn" id="openHist">Ver</button>
+      </div>
+    </section>
+
+    <!-- Ayuda creativa -->
+    <section class="card">
+      <div class="help-wrap">
+        <button class="help-btn" id="btnHelp">Necesito ayuda</button>
+        <div id="helpPhrase" class="help-phrase"><em>Pulsa el botón para una idea oblicua…</em></div>
       </div>
     </section>
   </div>
@@ -362,7 +382,7 @@ function pushHistorial(p,n,tp){
   if (arr[0] && arr[0].p===p && arr[0].n===n && arr[0].tp===tp) return;
   arr.unshift({p,n,tp,ts:Date.now()});
   if (arr.length>10) arr = arr.slice(0,10);
-  setHist(arr); // render en open
+  setHist(arr);
 }
 
 /* ====== Notación UI ====== */
@@ -413,7 +433,7 @@ function resetTP(){ TP=0; procesar(); }
 
 /* ====== Bottom Sheet – Historial con drag ====== */
 const sheet = $('#histSheet'), backdrop = $('#histBackdrop'), panel = $('#histPanel'), grab = $('#histGrab');
-const SNAP = [0.25, 0.5, 0.8]; // ratios de alto
+const SNAP = [0.25, 0.5, 0.8];
 let startY=0, startH=0, dragging=false;
 
 function setPanelHeightByRatio(r){
@@ -426,7 +446,7 @@ function getPanelRatio(){
 }
 function openHist(){
   renderHistorial();
-  setPanelHeightByRatio(0.5); // abre a 50%
+  setPanelHeightByRatio(0.5);
   sheet.classList.add('open'); sheet.setAttribute('aria-hidden','false'); document.body.style.overflow='hidden';
 }
 function closeHist(){
@@ -436,7 +456,6 @@ $('#openHist').addEventListener('click', openHist);
 backdrop.addEventListener('click', closeHist);
 window.addEventListener('keydown', (e)=>{ if (e.key==='Escape' && sheet.classList.contains('open')) closeHist(); });
 
-// Drag (touch + mouse)
 function onStart(e){
   dragging = true;
   startY = (e.touches? e.touches[0].clientY : e.clientY);
@@ -446,7 +465,7 @@ function onStart(e){
 function onMove(e){
   if (!dragging) return;
   const y = (e.touches? e.touches[0].clientY : e.clientY);
-  const dy = startY - y; // arriba => positivo
+  const dy = startY - y;
   const newH = startH + dy;
   const ratio = newH / window.innerHeight;
   setPanelHeightByRatio(ratio);
@@ -454,10 +473,9 @@ function onMove(e){
 function onEnd(){
   if (!dragging) return;
   dragging = false;
-  panel.style.transition = ''; // vuelve animación para snaps
+  panel.style.transition = '';
   const r = getPanelRatio();
-  if (r < 0.22){ closeHist(); return; } // muy abajo => cerrar
-  // snap al más cercano
+  if (r < 0.22){ closeHist(); return; }
   let nearest = SNAP[0]; let best = Infinity;
   for (let s of SNAP){ const diff = Math.abs(s - r); if (diff < best){ best = diff; nearest = s; } }
   setPanelHeightByRatio(nearest);
@@ -469,7 +487,7 @@ grab.addEventListener('touchstart', onStart, {passive:true});
 window.addEventListener('touchmove', onMove, {passive:false});
 window.addEventListener('touchend', onEnd);
 
-/* Render historial dentro del sheet */
+/* Render historial */
 function getHist(){ try{ return JSON.parse(localStorage.getItem('caged_hist_sheet_v2')||'[]'); }catch(e){ return []; } }
 function renderHistorial(){
   const box = $('#history'); if (!box) return;
@@ -483,6 +501,35 @@ function renderHistorial(){
     box.appendChild(div);
   });
 }
+
+/* ====== Ayuda creativa (frases.json) ====== */
+let OBL_CACHE = null;
+async function cargarFrases(){
+  if (OBL_CACHE) return OBL_CACHE;
+  const res = await fetch('frases.json');  // si está en otra carpeta, cambia la ruta
+  const data = await res.json();
+  const arr = data.estrategias_oblicuas || data.estrategias || data.phrases || [];
+  OBL_CACHE = Array.isArray(arr) ? arr : [];
+  return OBL_CACHE;
+}
+function mostrarFrase(texto){
+  const box = document.getElementById('helpPhrase');
+  box.textContent = texto || '—';
+  // animación sutil
+  box.classList.remove('show');
+  void box.offsetWidth; // reflow para reiniciar anim
+  box.classList.add('show');
+}
+document.getElementById('btnHelp').addEventListener('click', async ()=>{
+  try{
+    const arr = await cargarFrases();
+    if (!arr.length) { mostrarFrase('Non hai frases dispoñibles.'); return; }
+    const idx = Math.floor(Math.random() * arr.length);
+    mostrarFrase(arr[idx]);
+  }catch(e){
+    mostrarFrase('Non puiden cargar frases.json');
+  }
+});
 
 /* Boot + PWA */
 cargarEstado(); procesar();
